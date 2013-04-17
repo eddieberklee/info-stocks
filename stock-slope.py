@@ -6,9 +6,9 @@ class Date:
         splitDate = date.split('-')
 
         self.date = date
-        self.m = splitDate[1]
-        self.d = splitDate[0]
-        self.y = splitDate[2]
+        self.m = int(splitDate[0])
+        self.d = int(splitDate[1])
+        self.y = int(splitDate[2])
 
     # returns a tuple of start date and beginning date
     def dateRange(self, range): # range: num days
@@ -56,7 +56,7 @@ class Company:
         endDate = dateRange[1]
         interval = 'd'
         url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
-            % ( self.symbol, startDate.m, startDate.d, startDate.y, endDate.m, endDate.d, endDate.y, interval)
+            % ( self.symbol, startDate.m-1, startDate.d, startDate.y, endDate.m-1, endDate.d, endDate.y, interval)
         u = urllib.urlopen(url)
         for perDay in u.readlines():
             print perDay.strip()
@@ -64,8 +64,4 @@ class Company:
 
 apple = Company("Apple")
 print apple.getData()
-
-sampleDate = Date("1-1-2013")
-print sampleDate.dateRange(80)
-
 
