@@ -23,10 +23,6 @@ class Date:
 
         return (beginInterval, endInterval)
         
-
-
-
-
 class Company:
     def __init__(self, name):
         self.name = name
@@ -53,15 +49,13 @@ class Company:
             'Macbook Air (Mid 2012)' : '6-11-2012',
         }
     def getData(self):
-        productDate = self.release_dates['iBooks Author']
-        smonth = 1
-        sday = 12
-        syear = 2012
-        emonth = 1
-        eday = 26
-        eyear = 2012
-        url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=d&ignore=.csv" \
-            % ( self.symbol, smonth, sday, syear, emonth, eday, eyear )
+        productDate = Date(self.release_dates['iBooks Author'])
+        dateRange = productDate.dateRange(7)
+        startDate = dateRange[0]
+        endDate = dateRange[1]
+        interval = 'd'
+        url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
+            % ( self.symbol, startDate.m, startDate.d, startDate.y, endDate.m, endDate.d, endDate.y, interval)
         u = urllib.urlopen(url)
         for perDay in u.readlines():
             print perDay.strip()
