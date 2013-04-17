@@ -23,6 +23,22 @@ class Date:
         endInterval = str(endInterval.month) + '-' + str(endInterval.day) + '-' + str(endInterval.year)
 
         return (Date(beginInterval), Date(endInterval))
+
+def parse_yahoo_stock(line):
+    parts = line.split(',')
+    parts_dict = {}
+    # for product releases there may be a difference between diff('high', 'close')
+    # as opposed to more steady differences for a 'normal' non-release day
+    legends = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Adj Close']
+    floats = [0, 1, 1, 1, 1, 0, 1]
+    for i in range(len(parts)):
+        if i == 5:
+            parts_dict[legends[i]] = int(parts[i])
+        if floats[i]:
+            parts_dict[legends[i]] = float(parts[i])
+        else:
+            parts_dict[legends[i]] = parts[i]
+    return parts_dict
         
 class Company:
     def __init__(self, name):
@@ -50,7 +66,7 @@ class Company:
             'Macbook Air (Mid 2012)' : '6-11-2012',
         }
     def getData(self):
-        productDate = Date(self.release_dates['iBooks Author'])
+        productDate = Date(self.release_dates['Apple TV (3rd gen)'])
         dateRange = productDate.dateRange(7)
         startDate = dateRange[0]
         endDate = dateRange[1]
@@ -58,10 +74,22 @@ class Company:
         url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
             % ( self.symbol, startDate.m-1, startDate.d, startDate.y, endDate.m-1, endDate.d, endDate.y, interval)
         u = urllib.urlopen(url)
-        for perDay in u.readlines():
-            print perDay.strip()
+        ulines = u.read().split("\n")
+        start = ulines[1]
+        end = ulines[-2]
+        print 'Legend:             ' + ulines[0]
+        print 'Starting Date Data: ' + start
+        print 'Ending Date Data:   ' + end
+        difference = parse_yahoo_stock(start)['Close'] - parse_yahoo_stock(end)['Close']
+        if difference > 0:
+            sign = '+'
+        else:
+            sign = '-'
+        print sign + ' ' + str(difference)
+        # for perDay in u.readlines():
+        #     print perDay.strip()
 
 
 apple = Company("Apple")
-print apple.getData()
+apple.getData()
 
