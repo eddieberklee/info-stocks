@@ -2,8 +2,12 @@ import urllib
 import re
 
 class Date:
-    # TODO: parse month-day-year
-    pass
+    def __init__(self, date):
+        splitDate = date.split('-')
+
+        self.m = splitDate[1]
+        self.d = splitDate[0]
+        self.y = splitDate[2]
 
 class Company:
     def __init__(self, name):
