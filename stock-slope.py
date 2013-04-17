@@ -10,8 +10,8 @@ class Date:
         self.d = int(splitDate[1])
         self.y = int(splitDate[2])
 
-    # returns a tuple of start date and beginning date
-    def dateRange(self, range): # range: num days
+    # returns (start date, end date)
+    def dateRange(self, range): # range is in days
         import datetime
         date = datetime.date(int(self.y), int(self.m), int(self.d))
         
