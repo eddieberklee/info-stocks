@@ -2,8 +2,30 @@ import urllib
 import re
 
 class Date:
-    # TODO: parse month-day-year
-    pass
+    def __init__(self, date):
+        splitDate = date.split('-')
+
+        self.m = splitDate[1]
+        self.d = splitDate[0]
+        self.y = splitDate[2]
+
+    # returns a tuple of start date and beginning date
+    def dateRange(self, range): # range: num days
+        import datetime
+        date = datetime.date(int(self.y), int(self.m), int(self.d))
+        
+        difference = datetime.timedelta(days=range)
+        beginInterval = date - difference
+        endInterval = date + difference
+        
+        beginInterval = str(beginInterval.month) + '-' + str(beginInterval.day) + '-' + str(beginInterval.year)
+        endInterval = str(endInterval.month) + '-' + str(endInterval.day) + '-' + str(endInterval.year)
+
+        return (beginInterval, endInterval)
+        
+
+
+
 
 class Company:
     def __init__(self, name):
@@ -48,6 +70,7 @@ class Company:
 apple = Company("Apple")
 print apple.getData()
 
-
+sampleDate = Date("1-1-2013")
+print sampleDate.dateRange(80)
 
 
