@@ -32,7 +32,8 @@ class Company:
     def __str__(self):
         return str(self.__dict__.keys())
     def companyToSymbol(self):
-        url = "http://d.yimg.com/autoc.finance.yahoo.com/autoc?query=%s&callback=YAHOO.Finance.SymbolSuggest.ssCallback" % self.name
+        url = "http://d.yimg.com/autoc.finance.yahoo.com/autoc?query=%s&callback=YAHOO.Finance.SymbolSuggest.ssCallback" \
+            % self.name
         u = urllib.urlopen(url)
         data = u.read()
         m = re.search('symbol\":\"[a-zA-Z]*\"', data)
@@ -48,23 +49,23 @@ class Company:
             'Mac Pro (Mid 2012)' : '6-11-2012',
             'Macbook Air (Mid 2012)' : '6-11-2012',
         }
-appleCompany = Company("Apple")
+    def getData(self):
+        productDate = self.release_dates['iBooks Author']
+        smonth = 1
+        sday = 12
+        syear = 2012
+        emonth = 1
+        eday = 26
+        eyear = 2012
+        url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=d&ignore=.csv" \
+            % ( self.symbol, smonth, sday, syear, emonth, eday, eyear )
+        u = urllib.urlopen(url)
+        for perDay in u.readlines():
+            print perDay.strip()
 
-# TODO: enclose this into a method
-productDate = appleCompany.release_dates['iBooks Author']
-stockSymbol = appleCompany.symbol
-smonth = 1
-sday = 12
-syear = 2012
-emonth = 1
-eday = 26
-eyear = 2012
-url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=d&ignore=.csv" % ( stockSymbol, smonth, sday, syear, emonth, eday, eyear)
-u = urllib.urlopen(url)
-for perDay in u.readlines():
-    print perDay.strip()
 
-print appleCompany
+apple = Company("Apple")
+print apple.getData()
 
 sampleDate = Date("1-1-2013")
 print sampleDate.dateRange(80)
