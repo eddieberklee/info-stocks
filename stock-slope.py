@@ -11,16 +11,18 @@ class Date:
         self.y = int(splitDate[2])
 
     # returns (start date, end date)
-    def dateRange(self, range): # range is in days
+    def dateRange(self, daysPadding): # daysPadding is in days
         import datetime
         date = datetime.date(int(self.y), int(self.m), int(self.d))
         
-        difference = datetime.timedelta(days=range)
+        difference = datetime.timedelta(days=daysPadding)
         beginInterval = date - difference
         endInterval = date + difference
 
         beginInterval = str(beginInterval.month) + '-' + str(beginInterval.day) + '-' + str(beginInterval.year)
         endInterval = str(endInterval.month) + '-' + str(endInterval.day) + '-' + str(endInterval.year)
+        print beginInterval
+        print endInterval
 
         return (Date(beginInterval), Date(endInterval))
 
@@ -65,31 +67,34 @@ class Company:
             'Mac Pro (Mid 2012)' : '6-11-2012',
             'Macbook Air (Mid 2012)' : '6-11-2012',
         }
-    def getData(self):
+    def getData(self, daysPadding=7):
         productDate = Date(self.release_dates['Apple TV (3rd gen)'])
-        dateRange = productDate.dateRange(7)
+        dateRange = productDate.dateRange(daysPadding)
         startDate = dateRange[0]
-        endDate = dateRange[1]
+        endDate = dateRange[-1]
         interval = 'd'
         url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
             % ( self.symbol, startDate.m-1, startDate.d, startDate.y, endDate.m-1, endDate.d, endDate.y, interval)
         u = urllib.urlopen(url)
         ulines = u.read().split("\n")
-        start = ulines[1]
-        end = ulines[-2]
+        start = ulines[-2]
+        end = ulines[1]
         print 'Legend:             ' + ulines[0]
         print 'Starting Date Data: ' + start
         print 'Ending Date Data:   ' + end
-        difference = parse_yahoo_stock(start)['Close'] - parse_yahoo_stock(end)['Close']
+        difference = parse_yahoo_stock(end)['Close'] - parse_yahoo_stock(start)['Close']
         if difference > 0:
             sign = '+'
         else:
-            sign = '-'
-        print sign + ' ' + str(difference)
-        # for perDay in u.readlines():
-        #     print perDay.strip()
+            sign = ''
+        print sign + str(difference)
 
 
 apple = Company("Apple")
 apple.getData()
+apple.getData(6)
+apple.getData(5)
+apple.getData(4)
+apple.getData(3)
+apple.getData(2)
 
