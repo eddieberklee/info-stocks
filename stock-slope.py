@@ -41,7 +41,10 @@ def parse_yahoo_stock(line):
         else:
             parts_dict[legends[i]] = parts[i]
     return parts_dict
-        
+
+def getProductReleasesForApple():
+
+
 class Company:
     def __init__(self, name):
         self.name = name
@@ -97,4 +100,6 @@ apple.getData(5)
 apple.getData(4)
 apple.getData(3)
 apple.getData(2)
+
+getProductReleasesForApple()
 
