@@ -170,5 +170,4 @@ for value in timeline.values():
 
 timelineDataFrame = pandas.DataFrame({'Product Name': timeline.keys(), 'Family': family, 'Release Date':releaseDate, 'Stock Impact': stockSlope}).set_index('Product Name')
 
-timelineDataFrame.plot(x='Product Name', y='Stock Impact')
-
+timelineDataFrame.plot(use_index=True, y='Stock Impact')
