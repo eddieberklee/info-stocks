@@ -43,7 +43,37 @@ def parse_yahoo_stock(line):
     return parts_dict
 
 def getProductReleasesForApple():
+    import urllib, urllib2
+    from bs4 import BeautifulSoup
+    import re
+    article = "Timeline of Apple Inc. products"
+    article = urllib.quote(article) # sanitize
 
+    opener = urllib2.build_opener()
+    opener.addheaders = [('User-agent', 'Mozilla/5.0')] # wikipedia blocks obvious bot attempts
+    
+    resource = opener.open("http://en.wikipedia.org/wiki/"+article)
+    data = resource.read()
+    resource.close()
+    
+    soup = BeautifulSoup(data)
+    print soup.find('div',id="bodyContent")
+    bodyContent = soup.find('div',id="bodyContent")
+    wikitables = bodyContent.find_all('table',class_="wikitable")
+    first = 0
+    for wikitable in wikitables:
+        m = re.search('<b>[0-9]+</b>', str(wikitable))
+        year = m.group(0)
+        if first == 0:
+            # do special first computation
+            first = 1
+
+    # print wikitables
+    # print str(d).find('class=\"wikitable')
+    # for div in soup.find('div',id="bodyContent").find_all('div'):
+    #     print div.find('class=\"wikitable')
+    #     if div.find('class=\"wikitable'):
+    #         print div
 
 class Company:
     def __init__(self, name):
