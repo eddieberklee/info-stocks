@@ -257,7 +257,7 @@ import pandas
 import matplotlib as plt
 
 timeline = datahash
-
+print timeline.items()[0]
 sortedTimeline = sorted(timeline.items(),key=lambda tup: tup[1][1].dateSort())
 
 print sortedTimeline
@@ -276,7 +276,7 @@ for item in sortedTimeline:
 
 timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Family': family, 'Release Date':releaseDate, 'Date Discontinued': discontinueDate}).set_index('Product Name')
 
-
+print timelineDataFrame
 
 #timelineDataFrame.plot(use_index=True, y='')
 
