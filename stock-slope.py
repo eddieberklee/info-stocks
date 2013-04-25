@@ -271,9 +271,8 @@ import matplotlib as plt
 
 timeline = datahash
 print timeline.items()[0]
-sortedTimeline = sorted(timeline.items(),key=lambda tup: tup[1][1].dateSort())
+sortedTimeline = sorted(timeline.items(),key=lambda tup: tup[1][0].dateSort())
 
-print sortedTimeline
 
 productName = []
 family = []
@@ -281,16 +280,15 @@ releaseDate = []
 discontinueDate = []
 
 for item in sortedTimeline:
-    print item
     productName.append(item[0])
-    family.append(item[1][0])
-    releaseDate.append(item[1][1])
+    releaseDate.append(item[1][0])
+    family.append(item[1][1])
     discontinueDate.append(item[1][2])
 
-timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Family': family, 'Release Date':releaseDate, 'Date Discontinued': discontinueDate}).set_index('Product Name')
+timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate}).set_index('Product Name')
 
-print timelineDataFrame
+print timelineDataFrame.values
 
-#timelineDataFrame.plot(use_index=True, y='')
+timelineDataFrame.plot(use_index=True, y='')
 
 
