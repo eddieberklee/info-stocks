@@ -26,6 +26,19 @@ class Date:
 
         return (Date(beginInterval), Date(endInterval))
 
+    #returns an integer representation of the date that makes the date easy to sort
+    def dateSort(self):
+        year = str(self.y)
+        month = str(self.m)
+        day = str(self.d)
+
+        if len(year) == 1: year = '0'+ year
+        if len(month) == 1: month = '0'+ month
+        if len(day) == 1: day = '0'+ day
+
+        return int(year + month + day)
+
+
 def parse_yahoo_stock(line):
     parts = line.split(',')
     parts_dict = {}
@@ -227,31 +240,38 @@ apple.getData() # defaults to time padding of 7 days
 datahash = getProductReleasesForApple()
 print datahash
 
-
-# timeline = {}
-# timeline[productName] = [date, family]
-
-# columns = [productName, family, stockSlope]
-# Date (Month Day Year)
-# Product Name
-# Family
-# Stock Slope
-
 """
 import pandas
 import matplotlib as plt
 
-productName = timeline.keys()
+timeline = {}
+
+timeline['iPod'] = ['iPod Family', Date('12-12-12'), 25]
+timeline['iPod Touch'] = ['iPod Family', Date('1-1-1'), 11]
+timeline['iPhone'] = ['iPhone', Date('2-12-12'), 100]
+timeline['iMac'] = ['iMacs', Date('1-1-91'), -25]
+
+for item in timeline.items():
+    print item[1][1].dateSort()
+#sortedTimeline = timeline.items().sort(key=lambda tup: tup[1][1].dateSort())
+sortedTimeline = sorted(timeline.items(),key=lambda tup: tup[1][1].dateSort())
+
+print sortedTimeline
+
+productName = []
 family = []
 releaseDate = []
 stockSlope = []
 
-for value in timeline.values():
-    family.append(value[0])
-    releaseDate.append(value[1])
-    stockSlope.append(value[2])
+for item in sortedTimeline:
+    print item
+    productName.append(item[0])
+    family.append(item[1][0])
+    releaseDate.append(item[1][1])
+    stockSlope.append(item[1][2])
 
-timelineDataFrame = pandas.DataFrame({'Product Name': timeline.keys(), 'Family': family, 'Release Date':releaseDate, 'Stock Impact': stockSlope}).set_index('Product Name')
+timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Family': family, 'Release Date':releaseDate, 'Stock Impact': stockSlope}).set_index('Product Name')
 
 timelineDataFrame.plot(use_index=True, y='Stock Impact')
+
 """
