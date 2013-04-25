@@ -12,7 +12,7 @@ TODO
 * Use PANDAS!
 * Compare quarterly reports for scraping old and new ones.
 * Make a list of categories from quarterly reports 
-
+* add __str__ method to Date Class
 
 
 

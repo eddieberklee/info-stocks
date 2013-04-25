@@ -5,7 +5,6 @@ class Date:
     def __init__(self, date):
         splitDate = date.split('-')
         
-        print splitDate
         self.date = date
         self.m = int(splitDate[0])
         self.d = int(splitDate[1])
@@ -108,24 +107,16 @@ def getProductReleasesForApple():
                       year = m.group(0)
                       year = year[3:-4]
                     elif count == 1:
-                      print "Date 1"
                       # m = re.search('>[a-zA-Z0-9\ ]+<', str(td))
                       # date = m.group(0)
                       date = td.text
                       date = date + ' ' + year
-                      print date
                     elif count == 2:
-                      print "Product Name"
                       productName = td.text
-                      print productName
                     elif count == 3:
-                      print "Family"
                       family = td.text
-                      print family
                     elif count == 4:
-                      print "Discontinued Date"
                       deathDate = td.text
-                      print deathDate
                     count += 1
                   first = 0
                   months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -141,16 +132,10 @@ def getProductReleasesForApple():
                     for td in tds:
                       if count == 0:
                         productName = td.text
-                        print "Product Name"
-                        print productName
                       if count == 1:
                         family = td.text
-                        print "Family"
-                        print family
                       if count == 2:
                         deathDate = td.text
-                        print "Death Date"
-                        print deathDate
                       count += 1
                     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
                     dateSplit = str(date).split(' ')
@@ -165,20 +150,12 @@ def getProductReleasesForApple():
                       if count == 0:
                         date = td.text
                         date = date + ' ' + year
-                        print "Date"
-                        print date
                       if count == 1:
                         productName = td.text
-                        print "Product Name"
-                        print productName
                       if count == 2:
                         family = td.text
-                        print "Family"
-                        print family
                       if count == 3:
                         deathDate = td.text
-                        print "Death Date"
-                        print deathDate
                       count += 1
                     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
                     dateSplit = str(date).split(' ')
@@ -189,12 +166,11 @@ def getProductReleasesForApple():
                       newD = str(months.index(dateSplit[0])+1)+'-'+'00'+'-'+dateSplit[1]
                     products[str(productName)] = [Date(newD), str(family), str(deathDate)]
                   else:
-                    print 'WHAT IS THIS CASE???'
-                  print
+                    print 'ERROR CODE: 1'
             elif len(tr.find_all('th')) != 0:
                 ths = tr.find_all('th')
-                print 'ths:'
-                print ths
+                # print 'ths:'
+                # print ths
     # print products
     return products
 
