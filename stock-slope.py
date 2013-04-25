@@ -57,36 +57,51 @@ def getProductReleasesForApple():
     resource.close()
     
     soup = BeautifulSoup(data)
-    print soup.find('div',id="bodyContent")
+
+    # print soup.find('div',id="bodyContent")
+
+
     bodyContent = soup.find('div',id="bodyContent")
     wikitables = bodyContent.find_all('table',class_="wikitable")
-    first = 0
+
     for wikitable in wikitables:
         m = re.search('<b>[0-9]+</b>', str(wikitable))
         year = m.group(0)
-        if first == 0:
-            # do special first computation
-            # ignore first tr's td
-            trs = wikitable.find_all('tr')
-            tds = trs.find_all('td')
-            for td in tds:
-                print td
-            first = 1
+        # if first == 0:
+        # first = 1
+        first = 0
+        trs = wikitable.find_all('tr')
+        for tr in trs:
+            tr = BeautifulSoup(str(tr))
+            if len(tr.find_all('td')) != 0:
+                tds = tr.find_all('td')
+                print 'tds:'
+                print tds
+            elif len(tr.find_all('th')) != 0:
+                ths = tr.find_all('th')
+                print 'ths:'
+                print ths
 
-            timeline = {}
-            timeline[productName] = [date, family]
+        # trs = "".join(str(tr) for tr in trs)
+        # trs = BeautifulSoup(trs)
+        # tds = trs.find_all('td')
+        # count = 0
+        # for td in tds:
+        #     print td
+        #     print count
+        #     count += 1
+        #     if count == 0:
+        #         print "TITLE TITLE TITLE"
+        #     if count % 4 == 0:
+        #         print "PRODUCT PRODUCT PRODUCT"
 
-            columns = [productName, family, stockSlope]
-            # Date (Month Day Yearkk)
-            # Product Name
-            # Family
+        timeline = {}
+        # timeline[productName] = [date, family]
 
-    # print wikitables
-    # print str(d).find('class=\"wikitable')
-    # for div in soup.find('div',id="bodyContent").find_all('div'):
-    #     print div.find('class=\"wikitable')
-    #     if div.find('class=\"wikitable'):
-    #         print div
+        # columns = [productName, family, stockSlope]
+        # Date (Month Day Yearkk)
+        # Product Name
+        # Family
 
 class Company:
     def __init__(self, name):
@@ -121,7 +136,14 @@ class Company:
         interval = 'd'
         url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
             % ( self.symbol, startDate.m-1, startDate.d, startDate.y, endDate.m-1, endDate.d, endDate.y, interval)
-        u = urllib.urlopen(url)
+        from time import sleep
+        try:
+            u = urllib.urlopen(url)
+        except IOError as e:
+            print "I/O Error ({0}): {1}".format(e.errno, e.strerror)
+            sleep(3)
+            return this.getData(daysPadding)
+
         ulines = u.read().split("\n")
         start = ulines[-2]
         end = ulines[1]
@@ -145,16 +167,17 @@ apple.getData(2)
 
 getProductReleasesForApple()
 
-timeline = {}
-timeline[productName] = [date, family, stockSlope]
 
-#columns = [productName, family, stockSlope]
+# timeline = {}
+# timeline[productName] = [date, family]
 
+# columns = [productName, family, stockSlope]
 # Date (Month Day Year)
 # Product Name
 # Family
 # Stock Slope
 
+"""
 import pandas
 import matplotlib as plt
 
@@ -171,3 +194,4 @@ for value in timeline.values():
 timelineDataFrame = pandas.DataFrame({'Product Name': timeline.keys(), 'Family': family, 'Release Date':releaseDate, 'Stock Impact': stockSlope}).set_index('Product Name')
 
 timelineDataFrame.plot(use_index=True, y='Stock Impact')
+"""
