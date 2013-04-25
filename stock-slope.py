@@ -1,5 +1,6 @@
 import urllib
 import re
+import pandas
 
 class Date:
     def __init__(self, date):
@@ -148,3 +149,4 @@ columns = [productName, family, stockSlope]
 # Date (Month Day Year)
 # Product Name
 # Family
+
