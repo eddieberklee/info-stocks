@@ -64,19 +64,75 @@ def getProductReleasesForApple():
     bodyContent = soup.find('div',id="bodyContent")
     wikitables = bodyContent.find_all('table',class_="wikitable")
 
+    products = {}
+
     for wikitable in wikitables:
         m = re.search('<b>[0-9]+</b>', str(wikitable))
         year = m.group(0)
         # if first == 0:
         # first = 1
-        first = 0
+        first = 1
         trs = wikitable.find_all('tr')
         for tr in trs:
             tr = BeautifulSoup(str(tr))
             if len(tr.find_all('td')) != 0:
                 tds = tr.find_all('td')
-                print 'tds:'
-                print tds
+                count = 0
+                # if len(tds.find_all('b')) != 0:
+                year = ''
+                date = ''
+                productName = ''
+                family = ''
+                deathDate = ''
+                if first == 1:
+                  for td in tds:
+                    if count == 0:
+                      m = re.search('<b>[0-9]+</b>', str(td))
+                      year = m.group(0)
+                      year = year[3:-4]
+                    elif count == 1:
+                      print "Date"
+                      # m = re.search('>[a-zA-Z0-9\ ]+<', str(td))
+                      # date = m.group(0)
+                      date = td.text
+                      date = date + ' ' + year
+                      print date
+                    elif count == 2:
+                      print "Product Name"
+                      productName = td.text
+                      print productName
+                    elif count == 3:
+                      print "Family"
+                      family = td.text
+                      print family
+                    elif count == 4:
+                      print "Discontinued Date"
+                      deathDate = td.text
+                      print deathDate
+                    count += 1
+                  first = 0
+                  products[productName] = [date, family, deathDate]
+                else:
+                  print year
+                  for td in tds:
+                    if count == 0:
+                      print "Date"
+                      date = td.text
+                      date = date + ' ' + year
+                      print date
+                    elif count == 1:
+                      print "Product Name"
+                      productName = td.text
+                      print productName
+                    elif count == 2:
+                      print "Family"
+                      family = td.text
+                      print family
+                    elif count == 3:
+                      print "Discontinued Date"
+                      deathDate = td.text
+                      print deathDate
+                    count += 1
             elif len(tr.find_all('th')) != 0:
                 ths = tr.find_all('th')
                 print 'ths:'
@@ -137,12 +193,12 @@ class Company:
         url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
             % ( self.symbol, startDate.m-1, startDate.d, startDate.y, endDate.m-1, endDate.d, endDate.y, interval)
         from time import sleep
-        try:
-            u = urllib.urlopen(url)
-        except IOError as e:
-            print "I/O Error ({0}): {1}".format(e.errno, e.strerror)
-            sleep(3)
-            return this.getData(daysPadding)
+        # try:
+        u = urllib.urlopen(url)
+        # except IOError as e:
+        #     print "I/O Error ({0}): {1}".format(e.errno, e.strerror)
+        #     sleep(3)
+        #     return this.getData(daysPadding)
 
         ulines = u.read().split("\n")
         start = ulines[-2]
