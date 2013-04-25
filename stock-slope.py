@@ -144,11 +144,18 @@ def getProductReleasesForApple():
                         print "Death Date"
                         print deathDate
                       count += 1
-                    products[str(productName)] = [str(date), str(family), str(deathDate)]
+                    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+                    dateSplit = str(date).split(' ')
+                    if len(dateSplit) == 3:
+                      newD = str(months.index(dateSplit[0])+1)+'-'+dateSplit[1]+'-'+dateSplit[2]
+                    else:
+                      newD = str(months.index(dateSplit[0])+1)+'-'+'00'+'-'+dateSplit[1]
+                    products[str(productName)] = [newD, str(family), str(deathDate)]
                   elif len(tds) == 4:
                     for td in tds:
                       if count == 0:
                         date = td.text
+                        date = date + ' ' + year
                         print "Date"
                         print date
                       if count == 1:
@@ -164,7 +171,13 @@ def getProductReleasesForApple():
                         print "Death Date"
                         print deathDate
                       count += 1
-                    products[str(productName)] = [str(date), str(family), str(deathDate)]
+                    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+                    dateSplit = str(date).split(' ')
+                    if len(dateSplit) == 3:
+                      newD = str(months.index(dateSplit[0])+1)+'-'+dateSplit[1]+'-'+dateSplit[2]
+                    else:
+                      newD = str(months.index(dateSplit[0])+1)+'-'+'00'+'-'+dateSplit[1]
+                    products[str(productName)] = [newD, str(family), str(deathDate)]
                   else:
                     print 'WHAT IS THIS CASE???'
                   print
@@ -172,7 +185,7 @@ def getProductReleasesForApple():
                 ths = tr.find_all('th')
                 print 'ths:'
                 print ths
-    print products
+    # print products
     return products
 
 class Company:
@@ -238,7 +251,7 @@ apple.getData() # defaults to time padding of 7 days
 # apple.getData(2)
 
 datahash = getProductReleasesForApple()
-print datahash
+# print datahash
 
 """
 import pandas
