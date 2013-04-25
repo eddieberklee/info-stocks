@@ -223,6 +223,7 @@ apple.getData(2)
 
 getProductReleasesForApple()
 
+
 # timeline = {}
 # timeline[productName] = [date, family]
 
@@ -230,3 +231,23 @@ getProductReleasesForApple()
 # Date (Month Day Year)
 # Product Name
 # Family
+# Stock Slope
+
+"""
+import pandas
+import matplotlib as plt
+
+productName = timeline.keys()
+family = []
+releaseDate = []
+stockSlope = []
+
+for value in timeline.values():
+    family.append(value[0])
+    releaseDate.append(value[1])
+    stockSlope.append(value[2])
+
+timelineDataFrame = pandas.DataFrame({'Product Name': timeline.keys(), 'Family': family, 'Release Date':releaseDate, 'Stock Impact': stockSlope}).set_index('Product Name')
+
+timelineDataFrame.plot(use_index=True, y='Stock Impact')
+"""
