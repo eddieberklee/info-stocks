@@ -67,6 +67,15 @@ def getProductReleasesForApple():
         if first == 0:
             # do special first computation
             first = 1
+            # ignore first tr's td
+
+            timeline = {}
+            timeline[productName] = [date, family]
+
+            columns = [productName, family, stockSlope]
+            # Date (Month Day Year)
+            # Product Name
+            # Family
 
     # print wikitables
     # print str(d).find('class=\"wikitable')
@@ -122,7 +131,6 @@ class Company:
             sign = ''
         print sign + str(difference)
 
-
 apple = Company("Apple")
 apple.getData()
 apple.getData(6)
@@ -133,3 +141,10 @@ apple.getData(2)
 
 getProductReleasesForApple()
 
+timeline = {}
+timeline[productName] = [date, family]
+
+columns = [productName, family, stockSlope]
+# Date (Month Day Year)
+# Product Name
+# Family
