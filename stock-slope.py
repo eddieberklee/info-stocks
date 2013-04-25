@@ -66,14 +66,18 @@ def getProductReleasesForApple():
         year = m.group(0)
         if first == 0:
             # do special first computation
-            first = 1
             # ignore first tr's td
+            trs = wikitable.find_all('tr')
+            tds = trs.find_all('td')
+            for td in tds:
+                print td
+            first = 1
 
             timeline = {}
             timeline[productName] = [date, family]
 
             columns = [productName, family, stockSlope]
-            # Date (Month Day Year)
+            # Date (Month Day Yearkk)
             # Product Name
             # Family
 
