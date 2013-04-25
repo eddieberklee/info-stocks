@@ -130,10 +130,12 @@ def getProductReleasesForApple():
                   first = 0
                   months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
                   dateSplit = str(date).split(' ')
+                  if ',' in dateSplit[1]: dateSplit[1] = dateSplit[1][:-1]
                   if len(dateSplit) == 3:
                     newD = str(months.index(dateSplit[0])+1)+'-'+dateSplit[1]+'-'+dateSplit[2]
                   else:
                     newD = str(months.index(dateSplit[0])+1)+'-'+'00'+'-'+dateSplit[1]
+                  if ',' in newD: print newD
                   products[productName] = [Date(newD), family, deathDate]
                 else:
                   if len(tds) == 3:
@@ -153,10 +155,12 @@ def getProductReleasesForApple():
                       count += 1
                     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
                     dateSplit = str(date).split(' ')
+                    if ',' in dateSplit[1]: dateSplit[1] = dateSplit[1][:-1]
                     if len(dateSplit) == 3:
                       newD = str(months.index(dateSplit[0])+1)+'-'+dateSplit[1]+'-'+dateSplit[2]
                     else:
                       newD = str(months.index(dateSplit[0])+1)+'-'+'00'+'-'+dateSplit[1]
+                    if ',' in newD: print newD
                     products[str(productName)] = [Date(newD), str(family), str(deathDate)]
                   elif len(tds) == 4:
                     for td in tds:
@@ -180,10 +184,12 @@ def getProductReleasesForApple():
                       count += 1
                     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
                     dateSplit = str(date).split(' ')
+                    if ',' in dateSplit[1]: dateSplit[1] = dateSplit[1][:-1]
                     if len(dateSplit) == 3:
                       newD = str(months.index(dateSplit[0])+1)+'-'+dateSplit[1]+'-'+dateSplit[2]
                     else:
                       newD = str(months.index(dateSplit[0])+1)+'-'+'00'+'-'+dateSplit[1]
+                    if ',' in newD: print newD
                     products[str(productName)] = [Date(newD), str(family), str(deathDate)]
                   else:
                     print 'WHAT IS THIS CASE???'
