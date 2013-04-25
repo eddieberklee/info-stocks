@@ -73,17 +73,20 @@ def getProductReleasesForApple():
         # first = 1
         first = 1
         trs = wikitable.find_all('tr')
+        year = ''
+        date = ''
+        productName = ''
+        family = ''
+        deathDate = ''
+        rowspan = 0
+        rowspanFix = 1
+        spanSub = 0
         for tr in trs:
             tr = BeautifulSoup(str(tr))
             if len(tr.find_all('td')) != 0:
                 tds = tr.find_all('td')
                 count = 0
                 # if len(tds.find_all('b')) != 0:
-                year = ''
-                date = ''
-                productName = ''
-                family = ''
-                deathDate = ''
                 if first == 1:
                   for td in tds:
                     if count == 0:
@@ -91,7 +94,7 @@ def getProductReleasesForApple():
                       year = m.group(0)
                       year = year[3:-4]
                     elif count == 1:
-                      print "Date"
+                      print "Date 1"
                       # m = re.search('>[a-zA-Z0-9\ ]+<', str(td))
                       # date = m.group(0)
                       date = td.text
@@ -113,51 +116,51 @@ def getProductReleasesForApple():
                   first = 0
                   products[productName] = [date, family, deathDate]
                 else:
-                  print year
-                  for td in tds:
-                    if count == 0:
-                      print "Date"
-                      date = td.text
-                      date = date + ' ' + year
-                      print date
-                    elif count == 1:
-                      print "Product Name"
-                      productName = td.text
-                      print productName
-                    elif count == 2:
-                      print "Family"
-                      family = td.text
-                      print family
-                    elif count == 3:
-                      print "Discontinued Date"
-                      deathDate = td.text
-                      print deathDate
-                    count += 1
+                  if len(tds) == 3:
+                    for td in tds:
+                      if count == 0:
+                        productName = td.text
+                        print "Product Name"
+                        print productName
+                      if count == 1:
+                        family = td.text
+                        print "Family"
+                        print family
+                      if count == 2:
+                        deathDate = td.text
+                        print "Death Date"
+                        print deathDate
+                      count += 1
+                    products[str(productName)] = [str(date), str(family), str(deathDate)]
+                  elif len(tds) == 4:
+                    for td in tds:
+                      if count == 0:
+                        date = td.text
+                        print "Date"
+                        print date
+                      if count == 1:
+                        productName = td.text
+                        print "Product Name"
+                        print productName
+                      if count == 2:
+                        family = td.text
+                        print "Family"
+                        print family
+                      if count == 3:
+                        deathDate = td.text
+                        print "Death Date"
+                        print deathDate
+                      count += 1
+                    products[str(productName)] = [str(date), str(family), str(deathDate)]
+                  else:
+                    print 'WHAT IS THIS CASE???'
+                  print
             elif len(tr.find_all('th')) != 0:
                 ths = tr.find_all('th')
                 print 'ths:'
                 print ths
-
-        # trs = "".join(str(tr) for tr in trs)
-        # trs = BeautifulSoup(trs)
-        # tds = trs.find_all('td')
-        # count = 0
-        # for td in tds:
-        #     print td
-        #     print count
-        #     count += 1
-        #     if count == 0:
-        #         print "TITLE TITLE TITLE"
-        #     if count % 4 == 0:
-        #         print "PRODUCT PRODUCT PRODUCT"
-
-        timeline = {}
-        # timeline[productName] = [date, family]
-
-        # columns = [productName, family, stockSlope]
-        # Date (Month Day Yearkk)
-        # Product Name
-        # Family
+    print products
+    return products
 
 class Company:
     def __init__(self, name):
@@ -214,14 +217,15 @@ class Company:
         print sign + str(difference)
 
 apple = Company("Apple")
-apple.getData()
-apple.getData(6)
-apple.getData(5)
-apple.getData(4)
-apple.getData(3)
-apple.getData(2)
+apple.getData() # defaults to time padding of 7 days
+# apple.getData(6)
+# apple.getData(5)
+# apple.getData(4)
+# apple.getData(3)
+# apple.getData(2)
 
-getProductReleasesForApple()
+datahash = getProductReleasesForApple()
+print datahash
 
 
 # timeline = {}
