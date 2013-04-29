@@ -252,6 +252,26 @@ class Company:
             sign = ''
         print sign + str(difference)
 
+class Query:
+    def __init__(self, type, arg):
+        #types: "timerange, family, product"
+        if type=="timerange":
+            startDate = arg[0]
+            endDate = arg[1]
+            criterion = timelineDataFrame['Release Date'].map(lambda date: (date.dateSort() > startDate.dateSort()) and (date.dateSort() < endDate.dateSort()))
+            self.dataFrame = timelineDataFrame[criterion]
+
+        elif type=="family":
+            criterion = timelineDataFrame['Family'] == arg
+            self.dataFrame = timelineDataFrame[criterion]
+
+        elif type=="product":
+            self.dataFrame = timelineDataFrame[timelineDataFrame.index == arg]
+
+    def plot():
+        self.dataFrame.plot(use_index=True, y='Stock Impact')
+
+
 apple = Company("Apple")
 apple.getData() # defaults to time padding of 7 days
 # apple.getData(6)
@@ -267,10 +287,7 @@ import pandas
 import matplotlib as plt
 
 timeline = datahash
-print timeline.items()[0]
 sortedTimeline = sorted(timeline.items(),key=lambda tup: tup[1][1].numericDate())
-
-print sortedTimeline
 
 productName = []
 family = []
@@ -284,10 +301,4 @@ for item in sortedTimeline:
     releaseDate.append(item[1][1])
     discontinueDate.append(item[1][2])
 
-timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Family': family, 'Release Date':releaseDate, 'Date Discontinued': discontinueDate}).set_index('Product Name')
-
-print timelineDataFrame
-
-#timelineDataFrame.plot(use_index=True, y='')
-
-
+timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Stock Impact': 0}).set_index('Product Name')
