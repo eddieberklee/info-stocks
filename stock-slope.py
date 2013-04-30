@@ -76,7 +76,7 @@ def secFilingsLinks():
         actualFrame = str(frames[1])
         m = re.search('src="[a-zA-Z\?\.\=0-9\-\&;:\/]*"', actualFrame)
         actualLink = m.group(0)[5:-1]
-        print actualLink
+        # print actualLink
 
 def parse_yahoo_stock(line):
     parts = line.split(',')
@@ -206,91 +206,10 @@ def getProductReleasesForApple():
                     products[str(productName)] = [Date(newD), str(family), str(deathDate)]
             elif len(tr.find_all('th')) != 0:
                 ths = tr.find_all('th')
-    return products
-
-class Company:
-    def __init__(self, name):
-        self.name = name
-        self.companyToSymbol() # sets self.symbol
-        self.releaseDates() # sets self.releaseDates
-    def __str__(self):
-        return str(self.__dict__.keys())
-    def companyToSymbol(self):
-        url = "http://d.yimg.com/autoc.finance.yahoo.com/autoc?query=%s&callback=YAHOO.Finance.SymbolSuggest.ssCallback" \
-            % self.name
-        u = urllib.urlopen(url)
-        data = u.read()
-        m = re.search('symbol\":\"[a-zA-Z]*\"', data)
-        symbol = m.group(0)
-        symbol = symbol.split(':')[1][1:-1]
-        self.symbol = symbol
-        return symbol
-    def releaseDates(self):
-        self.release_dates = {
-            'iBooks Author' : '1-19-2012',
-            'iPad (3rd gen)' : '3-16-2012',
-            'Apple TV (3rd gen)' : '3-16-2012',
-            'Mac Pro (Mid 2012)' : '6-11-2012',
-            'Macbook Air (Mid 2012)' : '6-11-2012',
-        }
-    def getData(self, daysPadding=7):
-        productDate = Date(self.release_dates['Apple TV (3rd gen)'])
-        dateRange = productDate.dateRange(daysPadding)
-        startDate = dateRange[0]
-        endDate = dateRange[-1]
-        interval = 'd'
-        url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
-            % ( self.symbol, startDate.m-1, startDate.d, startDate.y, endDate.m-1, endDate.d, endDate.y, interval)
-        from time import sleep
-        # try:
-        u = urllib.urlopen(url)
-        # except IOError as e:
-        #     print "I/O Error ({0}): {1}".format(e.errno, e.strerror)
-        #     sleep(3)
-        #     return this.getData(daysPadding)
-
-        ulines = u.read().split("\n")
-        start = ulines[-2]
-        end = ulines[1]
-        # print 'Legend:             ' + ulines[0]
-        # print 'Starting Date Data: ' + start
-        # print 'Ending Date Data:   ' + end
-        difference = parse_yahoo_stock(end)['Close'] - parse_yahoo_stock(start)['Close']
-        if difference > 0:
-            sign = '+'
-        else:
-            sign = ''
-        # print sign + str(difference)
-
-    def addStockData(self, dataFrame, daysPadding=7): # adds stockdata to input dataframe
-
-        for row in dataFrame:
-            productDate = row['Release Date']
-            dateRange = productDate.dateRange(daysPadding)
-            startDate = dateRange[0]
-            endDate = dateRange[-1]
-            interval = 'd'
-            url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
-                % ( self.symbol, startDate.m-1, startDate.d, startDate.y, endDate.m-1, endDate.d, endDate.y, interval)
-            from time import sleep
-            
-            u = urllib.urlopen(url)
-            
-            ulines = u.read().split("\n")
-            start = ulines[-2]
-            end = ulines[1]
-            # print 'Legend:             ' + ulines[0]
-            # print 'Starting Date Data: ' + start
-            # print 'Ending Date Data:   ' + end
-            difference = parse_yahoo_stock(end)['Close'] - parse_yahoo_stock(start)['Close']
-            if difference > 0:
-                sign = '+'
-            else:
-                sign = ''
-            # print sign + str(difference)   
-            row['Stock Impact'] = difference 
+    return products 
 
 class Query:
+    #queryTypes: "timerange, family, product"
     def __init__(self, queryType, arg, daysPadding=1):
         self.daysPadding = daysPadding
         self.symbol = "AAPL"
@@ -298,10 +217,10 @@ class Query:
         self.arg = arg
 
         # set up the dataFrame
-        #queryTypes: "timerange, family, product"
         if queryType=="timerange":
             self.startDate = arg[0].dateRange(daysPadding)[0]
             self.endDate = arg[1].dateRange(daysPadding)[1]
+            self.dateBoundary()
             criterion = timelineDataFrame['Release Date'].map(lambda date: (date.numericDate() > self.startDate.numericDate()) and (date.numericDate() < self.endDate.numericDate()))
             self.dataFrame = timelineDataFrame[criterion]
         elif queryType=="family":
@@ -311,26 +230,43 @@ class Query:
                 dateRange = date.dateRange(daysPadding)
             self.startDate = self.dataFrame['Release Date'][0].dateRange(daysPadding)[0]
             self.endDate = self.dataFrame['Release Date'][-1].dateRange(daysPadding)[1]
+            self.dateBoundary()
         elif queryType=="product":
             self.dataFrame = timelineDataFrame[timelineDataFrame.index == arg]
-            dateRange = self.dataFrame['Release Date'].dateRange(daysPadding)
+            dateRange = self.dataFrame['Release Date'][0].dateRange(daysPadding)
             self.startDate = dateRange[0]
             self.endDate = dateRange[1]
+            self.dateBoundary()
         else:
             print "invalid queryType"
 
         self.setStockData()
         print self.dataFrame
 
-    def plot(self):
+    def dateBoundary(self):
+        dateBoundary = Date("9-2-1985")
+        if self.startDate.numericDate() < dateBoundary.numericDate():
+            print "startDate goes past the  information we have. startDate set to earliest possible date."
+            self.startDate = dateBoundary
+
+    def plotIndividualStockDifferences(self):
         import matplotlib.pyplot as plt
-        self.dataFrame.plot(use_index=True, y='Individual Stock Impact')
+        self.dataFrame.plot(use_index=True, y='Individual Stock Difference')
+        plt.show()
+
+    def plotSlopeChanges(self):
+        import matplotlib.pyplot as plt
+        self.dataFrame.plot(use_index=True, y='Stock Slope Change')
         plt.show()
 
     def getIndividualStock(self, releaseDate):
         dateRange = releaseDate.dateRange(self.daysPadding)
         startIndividualDate = dateRange[0]
         endIndividualDate = dateRange[1]
+
+        if startIndividualDate.numericDate() < Date("9-2-1985"):
+            startIndividualDate = Date("9-2-1985")
+
         interval = 'd'
         url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
             % ( self.symbol, startIndividualDate.m-1, startIndividualDate.d, startIndividualDate.y, endIndividualDate.m-1, endIndividualDate.d, endIndividualDate.y, interval)
@@ -346,12 +282,13 @@ class Query:
         if difference > 0:
             sign = '+'
         else:
-            sign = ''
+            sign = '-'
         #print sign + str(difference)   
         return difference
 
     def getRangeStockData(self):
         interval = 'd'
+
         url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
             % ( self.symbol, self.startDate.m-1, self.startDate.d, self.startDate.y, self.endDate.m-1, self.endDate.d, self.endDate.y, interval)
         from time import sleep
@@ -366,33 +303,54 @@ class Query:
         if difference > 0:
             sign = '+'
         else:
-            sign = ''
+            sign = '-'
         #print sign + str(difference)   
         return difference
 
+    def getStockSlope(self, releaseDate):
+        interval = 'd'
+        url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
+            % ( self.symbol, self.startDate.m-1, self.startDate.d, self.startDate.y, releaseDate.m-1, releaseDate.d, releaseDate.y, interval)
+        from time import sleep
+        u = urllib.urlopen(url)
+        ulines = u.read().split("\n")
+        start = ulines[-2]
+        end = ulines[1]
+        leadingDifference = parse_yahoo_stock(end)['Close'] - parse_yahoo_stock(start)['Close']
+        leadingSlope = leadingDifference / self.daysPadding
+
+        url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
+            % ( self.symbol, releaseDate.m-1, releaseDate.d, releaseDate.y, self.endDate.m-1, self.endDate.d, self.endDate.y, interval)
+        from time import sleep
+        u = urllib.urlopen(url)
+        ulines = u.read().split("\n")
+        start = ulines[-2]
+        end = ulines[1]
+        leavingDifference = parse_yahoo_stock(end)['Close'] - parse_yahoo_stock(start)['Close']
+        leavingSlope = leavingDifference / self.daysPadding
+
+        slopeDifference = leavingSlope - leadingSlope
+        return slopeDifference       
+
     def setStockData(self): # should set both RangeStock and IndividualStock
         rangeStockImpact = self.getRangeStockData()
-        self.dataFrame['Range Stock Impact'] = rangeStockImpact
+        self.dataFrame['Range Stock Difference'] = rangeStockImpact
         indivStocks = []
+        stockSlopes = []
         for date in self.dataFrame['Release Date']:
             indivStocks.append(self.getIndividualStock(date))
-        self.dataFrame['Individual Stock Impact'] = indivStocks
-
-
-apple = Company("Apple")
-apple.getData() # defaults to time padding of 7 days
-# apple.getData(6)
-# apple.getData(5)
-# apple.getData(4)
-# apple.getData(3)
-# apple.getData(2)
+            stockSlopes.append(self.getStockSlope(date))
+        self.dataFrame['Individual Stock Difference'] = indivStocks
+        self.dataFrame['Stock Slope Change'] = stockSlopes
+        
+    #returns row of most influential product
+    def getMostInfluencial(self):
+        maxIndex = self.dataFrame['Individual Stock Difference'].argmax()
+        maxProduct = self.dataFrame.index[maxIndex]
+        maxProductRow = self.dataFrame[self.dataFrame.index == maxProduct]
+        return maxProductRow
 
 datahash = getProductReleasesForApple()
-print datahash
-
-"""
-import pandas
-import matplotlib as plt
 
 timeline = datahash
 
@@ -408,21 +366,10 @@ for item in sortedTimeline:
     releaseDate.append(item[1][0])
     family.append(item[1][1])
     discontinueDate.append(item[1][2])
-
-timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Individual Stock Impact': 0, 'Range Stock Impact': 0}).set_index('Product Name')
+import pandas 
+timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Individual Stock Difference': 0, 'Range Stock Difference': 0, 'Stock Slope Change': 0}).set_index('Product Name')
 
 secFilingsLinks()
 
-sampleQuery = Query("family", "Power Macintosh")
-sampleQuery.plot()
-sampleQuery = Query("family", "Modems")
-print sampleQuery.startDate.date
-print sampleQuery.endDate.date
-print sampleQuery.getStockData()
-print sampleQuery.dataFrame
-"""
-
-
-
-
-
+sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
+sampleQuery.plotSlopeChanges()
