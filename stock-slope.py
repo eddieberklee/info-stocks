@@ -3,11 +3,24 @@ import re
 
 class Date:
     def __init__(self, date):
-        splitDate = date.split('-')
-        self.date = date
-        self.m = int(splitDate[0])
-        self.d = int(splitDate[1])
-        self.y = int(splitDate[2])
+        months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        if re.search('[a-zA-Z]{3}\ [0-9]{1,2},\ [0-9]{4}',date):
+            splitDate = date.split(' ')
+
+            threeLetterMonths = map(lambda month: month[:3], months)
+
+            self.m = int(threeLetterMonths.index(splitDate[0])+1)
+
+            if ',' in splitDate[1]:
+                self.d = int(splitDate[1].replace(',',''))
+            self.y = int(splitDate[2])
+            self.date = `self.m` + '-' + `self.d` + '-' + `self.y`
+        else:
+            splitDate = date.split('-')
+            self.date = date
+            self.m = int(splitDate[0])
+            self.d = int(splitDate[1])
+            self.y = int(splitDate[2])
 
     def __repr__(self):
         return str('Date(' + self.date + ')')
@@ -41,42 +54,101 @@ class Date:
 
         return int(year + month + day)
 
-def secFilingsLinks():
-    from bs4 import BeautifulSoup
-    import re
-    firsturl = 'http://investor.apple.com/sec.cfm?DocType=Quarterly&DocTypeExclude=&SortOrder=FilingDate%20Descending&Year=&Pagenum=1&FormatFilter=&CIK='
-    html = urllib.urlopen(firsturl).read()
-    soup = BeautifulSoup(html)
-    content = soup.find('table',id='filings-table')
-    trs = BeautifulSoup(str(content.find_all('tr')))
-    links = []
-    for tr in trs:
-        tds = BeautifulSoup(str(tr)).find_all('td')
-        if len(tds) >= 1:
-            lastTD = tds[-1]
-            a = BeautifulSoup(str(lastTD)).find('a')
-            a = str(a)
-            m = re.search('href="[a-zA-Z\?\.\=0-9\-\&;]*"', a)
-            link = m.group(0)[6:-1]
-            links.append('http://investor.apple.com/' + link)
-    # print links
+class TenQ:
+    def __init__(self):
+        # self.links = self.getAllSecFilingsLinks
+        pass
 
-    htmlLinks = {}
+    def parseSingle(self, link):
+        from bs4 import BeautifulSoup
+        import urllib
+        import re
+        html = urllib.urlopen(link).read()
+        soup = BeautifulSoup(html)
 
-    # for loop it here
-    for link in links:
+        # Condensed Consolidated Statements of Operations (Unaudited)
+        tempi = html.lower().find('condensed consolidated statements of operations (unaudited)')
+        csoup = BeautifulSoup(html[tempi:])
+        csoup = BeautifulSoup(str(csoup.find('table')))
+        trs = csoup.findAll('tr')
+        for tr in trs:
+            tr = BeautifulSoup(str(tr))
+            trtext = tr.text.strip()
+            # go through each td instead of trying to parse tr stuff
+            print trtext
+            labels = re.search('[a-zA-Z\ ][a-zA-Z\ ]*',trtext)
+            print labels.group(0)
+            print trtext.split('  ')
+            if len(trtext.split()) > 0:
+                pass
+            # print tr.findAll('td', {'align':'RIGHT'})
 
-        # testLink = links[0]
-        testLink = link
-        soup = BeautifulSoup(urllib.urlopen(testLink).read())
+    def getAllSecFilingsLinks(self):
+        from bs4 import BeautifulSoup
+        import re
+        firsturl = 'http://investor.apple.com/sec.cfm?DocType=Quarterly&DocTypeExclude=&SortOrder=FilingDate%20Descending&Year=&Pagenum=1&FormatFilter=&CIK='
+        pagesLeft = True
+        links = {}
 
-        fileDate = soup.find('meta')['content']
+        print 'Scraping all 10-Q HTML Links...'
 
-        frames = soup.find_all('frame')
-        actualFrame = str(frames[1])
-        m = re.search('src="[a-zA-Z\?\.\=0-9\-\&;:\/]*"', actualFrame)
-        actualLink = m.group(0)[5:-1]
-        # print actualLink
+        while pagesLeft == True:
+            html = urllib.urlopen(firsturl).read()
+            soup = BeautifulSoup(html)
+
+            try:
+                message = BeautifulSoup(str(soup.find('div',id='main'))).find('div',{'class':'table-wrapper'}).find('p').text
+            except:
+                message = 'Could not find means there are more pages to search'
+            if message == 'There are no Quarterly filings available.': pagesLeft = False; break
+
+            filingsTable = BeautifulSoup(str(soup.find('table',id='filings-table')))
+
+            trs = BeautifulSoup(str(filingsTable.find_all('tr')))
+            for tr in trs:
+                tds = BeautifulSoup(str(tr)).find_all('td')
+                if len(tds) >= 1:
+                    lastTD = tds[-1]
+                    a = BeautifulSoup(str(lastTD)).find('a')
+                    a = str(a)
+                    m = re.search('href="[a-zA-Z\?\.\=0-9\-\&;]*"', a)
+                    link = m.group(0)[6:-1]
+
+                    filing = tds[0]
+                    filing = filing.text
+
+                    date = tds[2]
+                    date = Date(date.text)
+
+                    if filing == '10-Q':
+                        links[date] = 'http://investor.apple.com/' + link
+
+            newlink = 'http://investor.apple.com' + BeautifulSoup(str(soup.find('div',{'class':'table-nav rounded clearme'}))).findAll('a')[-2]['href']
+
+            firsturl = newlink
+
+        # print links
+
+        htmlLinks = {}
+
+        for date in links.keys():
+            link = links[date]
+            testLink = link
+            soup = BeautifulSoup(urllib.urlopen(testLink).read())
+
+            fileDate = soup.find('meta')['content']
+
+            frames = soup.find_all('frame')
+            actualFrame = str(frames[1])
+            m = re.search('src="[a-zA-Z\?\.\=0-9\-\&;:\/]*"', actualFrame)
+            actualLink = m.group(0)[5:-1]
+
+            links[date] = actualLink
+        return links
+
+t = TenQ()
+t.parseSingle('http://apps.shareholder.com/sec/viewerContent.aspx?companyid=AAPL&docid=9236741')
+
 
 def parse_yahoo_stock(line):
     parts = line.split(',')
@@ -368,8 +440,6 @@ for item in sortedTimeline:
     discontinueDate.append(item[1][2])
 import pandas 
 timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Individual Stock Difference': 0, 'Range Stock Difference': 0, 'Stock Slope Change': 0}).set_index('Product Name')
-
-secFilingsLinks()
 
 sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
 sampleQuery.plotSlopeChanges()
