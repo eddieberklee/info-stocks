@@ -38,7 +38,6 @@ class Date:
 
         return int(year + month + day)
 
-<<<<<<< HEAD
 def secFilingsLinks():
     from bs4 import BeautifulSoup
     import re
@@ -76,8 +75,6 @@ def secFilingsLinks():
         actualLink = m.group(0)[5:-1]
         print actualLink
 
-=======
->>>>>>> e3ae7a5408f94616bee3271736ef40927056d433
 def parse_yahoo_stock(line):
     parts = line.split(',')
     parts_dict = {}
