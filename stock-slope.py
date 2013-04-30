@@ -335,12 +335,36 @@ class Query:
         else:
             print "invalid queryType"
 
-    def plot(self):
-        import matplotlib
-        self.dataFrame.plot(use_index=True, y='Stock Impact')
+        self.setStockData()
+        print self.dataFrame
 
-    def getIndividualStock(self):
-        pass
+    def plot(self):
+        import matplotlib.pyplot as plt
+        self.dataFrame.plot(use_index=True, y='Individual Stock Impact')
+        plt.show()
+
+    def getIndividualStock(self, releaseDate):
+        dateRange = releaseDate.dateRange(self.daysPadding)
+        startIndividualDate = dateRange[0]
+        endIndividualDate = dateRange[1]
+        interval = 'd'
+        url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
+            % ( self.symbol, startIndividualDate.m-1, startIndividualDate.d, startIndividualDate.y, endIndividualDate.m-1, endIndividualDate.d, endIndividualDate.y, interval)
+        from time import sleep
+            
+        u = urllib.urlopen(url)
+            
+        ulines = u.read().split("\n")
+        start = ulines[-2]
+        end = ulines[1]
+        
+        difference = parse_yahoo_stock(end)['Close'] - parse_yahoo_stock(start)['Close']
+        if difference > 0:
+            sign = '+'
+        else:
+            sign = ''
+        #print sign + str(difference)   
+        return difference
 
     def getRangeStockData(self):
         interval = 'd'
@@ -362,8 +386,14 @@ class Query:
         #print sign + str(difference)   
         return difference
 
-    def setStockData(self):
-        pass
+    def setStockData(self): # should set both RangeStock and IndividualStock
+        rangeStockImpact = self.getRangeStockData()
+        self.dataFrame['Range Stock Impact'] = rangeStockImpact
+        indivStocks = []
+        for date in self.dataFrame['Release Date']:
+            indivStocks.append(self.getIndividualStock(date))
+        self.dataFrame['Individual Stock Impact'] = indivStocks
+
 
 apple = Company("Apple")
 apple.getData() # defaults to time padding of 7 days
@@ -397,14 +427,17 @@ for item in sortedTimeline:
     family.append(item[1][1])
     discontinueDate.append(item[1][2])
 
-timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Stock Impact': 0}).set_index('Product Name')
+timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Individual Stock Impact': 0, 'Range Stock Impact': 0}).set_index('Product Name')
 
+sampleQuery = Query("family", "Power Macintosh")
+sampleQuery.plot()
 sampleQuery = Query("family", "Modems")
 print sampleQuery.startDate.date
 print sampleQuery.endDate.date
 print sampleQuery.getStockData()
 print sampleQuery.dataFrame
 """
+
 
 
 
