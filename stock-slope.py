@@ -9,6 +9,9 @@ class Date:
         self.d = int(splitDate[1])
         self.y = int(splitDate[2])
 
+    def __repr__(self):
+        return str('Date(' + self.date + ')')
+
     # returns (start date, end date)
     def dateRange(self, daysPadding): # daysPadding is in days
         import datetime
@@ -348,7 +351,8 @@ class Query:
         import matplotlib
         self.dataFrame.plot(use_index=True, y='Stock Impact')
 
-    def getIndividualStock
+    def getIndividualStock(self):
+        pass
 
     def getRangeStockData(self):
         interval = 'd'
@@ -371,6 +375,7 @@ class Query:
         return difference
 
     def setStockData(self):
+        pass
 
 apple = Company("Apple")
 apple.getData() # defaults to time padding of 7 days
@@ -381,8 +386,9 @@ apple.getData() # defaults to time padding of 7 days
 # apple.getData(2)
 
 datahash = getProductReleasesForApple()
-# print datahash
+print datahash
 
+"""
 import pandas
 import matplotlib as plt
 
@@ -410,3 +416,8 @@ print sampleQuery.startDate.date
 print sampleQuery.endDate.date
 print sampleQuery.getStockData()
 print sampleQuery.dataFrame
+"""
+
+
+
+
