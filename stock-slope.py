@@ -370,7 +370,6 @@ class Query:
         #print sign + str(difference)   
         return difference
 
-<<<<<<< HEAD
     def setStockData(self): # should set both RangeStock and IndividualStock
         rangeStockImpact = self.getRangeStockData()
         self.dataFrame['Range Stock Impact'] = rangeStockImpact
@@ -378,10 +377,7 @@ class Query:
         for date in self.dataFrame['Release Date']:
             indivStocks.append(self.getIndividualStock(date))
         self.dataFrame['Individual Stock Impact'] = indivStocks
-=======
-    def setStockData(self):
-        pass
->>>>>>> f93ee934b446d26f001cc3f1864ccbfa0bae33fe
+
 
 apple = Company("Apple")
 apple.getData() # defaults to time padding of 7 days
@@ -417,10 +413,8 @@ timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date
 
 secFilingsLinks()
 
-<<<<<<< HEAD
 sampleQuery = Query("family", "Power Macintosh")
 sampleQuery.plot()
-=======
 sampleQuery = Query("family", "Modems")
 print sampleQuery.startDate.date
 print sampleQuery.endDate.date
@@ -431,4 +425,4 @@ print sampleQuery.dataFrame
 
 
 
->>>>>>> f93ee934b446d26f001cc3f1864ccbfa0bae33fe
+
