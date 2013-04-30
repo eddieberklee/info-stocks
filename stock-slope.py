@@ -9,6 +9,9 @@ class Date:
         self.d = int(splitDate[1])
         self.y = int(splitDate[2])
 
+    def __repr__(self):
+        return str('Date(' + self.date + ')')
+
     # returns (start date, end date)
     def dateRange(self, daysPadding): # daysPadding is in days
         import datetime
@@ -143,24 +146,16 @@ def getProductReleasesForApple():
                       year = m.group(0)
                       year = year[3:-4]
                     elif count == 1:
-                      #print "Date 1"
                       # m = re.search('>[a-zA-Z0-9\ ]+<', str(td))
                       # date = m.group(0)
                       date = td.text
                       date = date + ' ' + year
-                      #print date
                     elif count == 2:
-                      #print "Product Name"
                       productName = td.text
-                      #print productName
                     elif count == 3:
-                      #print "Family"
                       family = td.text
-                      #print family
                     elif count == 4:
-                      #print "Discontinued Date"
                       deathDate = td.text
-                      #print deathDate
                     count += 1
                   first = 0
                   months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -176,16 +171,10 @@ def getProductReleasesForApple():
                     for td in tds:
                       if count == 0:
                         productName = td.text
-                        #print "Product Name"
-                        #print productName
                       if count == 1:
                         family = td.text
-                        #print "Family"
-                        #print family
                       if count == 2:
                         deathDate = td.text
-                        #print "Death Date"
-                        #print deathDate
                       count += 1
                     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
                     dateSplit = str(date).split(' ')
@@ -200,20 +189,12 @@ def getProductReleasesForApple():
                       if count == 0:
                         date = td.text
                         date = date + ' ' + year
-                        #print "Date"
-                        #print date
                       if count == 1:
                         productName = td.text
-                        #print "Product Name"
-                        #print productName
                       if count == 2:
                         family = td.text
-                        #print "Family"
-                        #print family
                       if count == 3:
                         deathDate = td.text
-                        #print "Death Date"
-                        #print deathDate
                       count += 1
                     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
                     dateSplit = str(date).split(' ')
@@ -223,14 +204,8 @@ def getProductReleasesForApple():
                     else:
                       newD = str(months.index(dateSplit[0])+1)+'-'+'00'+'-'+dateSplit[1]
                     products[str(productName)] = [Date(newD), str(family), str(deathDate)]
-                  #else:
-                    #print 'WHAT IS THIS CASE???'
-                  #print
             elif len(tr.find_all('th')) != 0:
                 ths = tr.find_all('th')
-                #print 'ths:'
-                #print ths
-    # print products
     return products
 
 class Company:
@@ -395,6 +370,7 @@ class Query:
         #print sign + str(difference)   
         return difference
 
+<<<<<<< HEAD
     def setStockData(self): # should set both RangeStock and IndividualStock
         rangeStockImpact = self.getRangeStockData()
         self.dataFrame['Range Stock Impact'] = rangeStockImpact
@@ -402,6 +378,10 @@ class Query:
         for date in self.dataFrame['Release Date']:
             indivStocks.append(self.getIndividualStock(date))
         self.dataFrame['Individual Stock Impact'] = indivStocks
+=======
+    def setStockData(self):
+        pass
+>>>>>>> f93ee934b446d26f001cc3f1864ccbfa0bae33fe
 
 apple = Company("Apple")
 apple.getData() # defaults to time padding of 7 days
@@ -412,8 +392,9 @@ apple.getData() # defaults to time padding of 7 days
 # apple.getData(2)
 
 datahash = getProductReleasesForApple()
-# print datahash
+print datahash
 
+"""
 import pandas
 import matplotlib as plt
 
@@ -436,5 +417,18 @@ timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date
 
 secFilingsLinks()
 
+<<<<<<< HEAD
 sampleQuery = Query("family", "Power Macintosh")
 sampleQuery.plot()
+=======
+sampleQuery = Query("family", "Modems")
+print sampleQuery.startDate.date
+print sampleQuery.endDate.date
+print sampleQuery.getStockData()
+print sampleQuery.dataFrame
+"""
+
+
+
+
+>>>>>>> f93ee934b446d26f001cc3f1864ccbfa0bae33fe
