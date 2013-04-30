@@ -68,7 +68,20 @@ class TenQ:
 
         # Condensed Consolidated Statements of Operations (Unaudited)
         tempi = html.lower().find('condensed consolidated statements of operations (unaudited)')
-        print tempi
+        csoup = BeautifulSoup(html[tempi:])
+        csoup = BeautifulSoup(str(csoup.find('table')))
+        trs = csoup.findAll('tr')
+        for tr in trs:
+            tr = BeautifulSoup(str(tr))
+            trtext = tr.text.strip()
+            # go through each td instead of trying to parse tr stuff
+            print trtext
+            labels = re.search('[a-zA-Z\ ][a-zA-Z\ ]*',trtext)
+            print labels.group(0)
+            print trtext.split('  ')
+            if len(trtext.split()) > 0:
+                pass
+            # print tr.findAll('td', {'align':'RIGHT'})
 
     def getAllSecFilingsLinks(self):
         from bs4 import BeautifulSoup
@@ -109,8 +122,6 @@ class TenQ:
 
                     if filing == '10-Q':
                         links[date] = 'http://investor.apple.com/' + link
-
-            # dates.append()
 
             newlink = 'http://investor.apple.com' + BeautifulSoup(str(soup.find('div',{'class':'table-nav rounded clearme'}))).findAll('a')[-2]['href']
 
