@@ -54,68 +54,89 @@ class Date:
 
         return int(year + month + day)
 
-def secFilingsLinks():
-    from bs4 import BeautifulSoup
-    import re
-    firsturl = 'http://investor.apple.com/sec.cfm?DocType=Quarterly&DocTypeExclude=&SortOrder=FilingDate%20Descending&Year=&Pagenum=1&FormatFilter=&CIK='
-    pagesLeft = True
-    links = []
+class TenQ:
+    def __init__(self):
+        # self.links = self.getAllSecFilingsLinks
+        pass
 
-    while pagesLeft == True:
-        print firsturl
-        html = urllib.urlopen(firsturl).read()
+    def parseSingle(self, link):
+        from bs4 import BeautifulSoup
+        import urllib
+        import re
+        html = urllib.urlopen(link).read()
         soup = BeautifulSoup(html)
 
-        try:
-            message = BeautifulSoup(str(soup.find('div',id='main'))).find('div',{'class':'table-wrapper'}).find('p').text
-        except:
-            message = 'Could not find means there are more pages to search'
-        if message == 'There are no Quarterly filings available.': pagesLeft = False; break
+        # Condensed Consolidated Statements of Operations (Unaudited)
+        tempi = html.lower().find('condensed consolidated statements of operations (unaudited)')
+        print tempi
 
-        filingsTable = BeautifulSoup(str(soup.find('table',id='filings-table')))
+    def getAllSecFilingsLinks(self):
+        from bs4 import BeautifulSoup
+        import re
+        firsturl = 'http://investor.apple.com/sec.cfm?DocType=Quarterly&DocTypeExclude=&SortOrder=FilingDate%20Descending&Year=&Pagenum=1&FormatFilter=&CIK='
+        pagesLeft = True
+        links = {}
 
-        trs = BeautifulSoup(str(filingsTable.find_all('tr')))
-        for tr in trs:
-            tds = BeautifulSoup(str(tr)).find_all('td')
-            if len(tds) >= 1:
-                lastTD = tds[-1]
-                a = BeautifulSoup(str(lastTD)).find('a')
-                a = str(a)
-                m = re.search('href="[a-zA-Z\?\.\=0-9\-\&;]*"', a)
-                link = m.group(0)[6:-1]
+        print 'Scraping all 10-Q HTML Links...'
 
-                filing = tds[0]
-                filing = filing.text
+        while pagesLeft == True:
+            html = urllib.urlopen(firsturl).read()
+            soup = BeautifulSoup(html)
 
-                date = tds[2]
-                print Date(date.text)
+            try:
+                message = BeautifulSoup(str(soup.find('div',id='main'))).find('div',{'class':'table-wrapper'}).find('p').text
+            except:
+                message = 'Could not find means there are more pages to search'
+            if message == 'There are no Quarterly filings available.': pagesLeft = False; break
 
-                links.append('http://investor.apple.com/' + link)
+            filingsTable = BeautifulSoup(str(soup.find('table',id='filings-table')))
 
-        # dates.append()
+            trs = BeautifulSoup(str(filingsTable.find_all('tr')))
+            for tr in trs:
+                tds = BeautifulSoup(str(tr)).find_all('td')
+                if len(tds) >= 1:
+                    lastTD = tds[-1]
+                    a = BeautifulSoup(str(lastTD)).find('a')
+                    a = str(a)
+                    m = re.search('href="[a-zA-Z\?\.\=0-9\-\&;]*"', a)
+                    link = m.group(0)[6:-1]
 
-        newlink = 'http://investor.apple.com' + BeautifulSoup(str(soup.find('div',{'class':'table-nav rounded clearme'}))).findAll('a')[-2]['href']
+                    filing = tds[0]
+                    filing = filing.text
 
-        firsturl = newlink
+                    date = tds[2]
+                    date = Date(date.text)
 
-    # print links
+                    if filing == '10-Q':
+                        links[date] = 'http://investor.apple.com/' + link
 
-    htmlLinks = {}
+            # dates.append()
 
-    # for loop it here
-    for link in links:
+            newlink = 'http://investor.apple.com' + BeautifulSoup(str(soup.find('div',{'class':'table-nav rounded clearme'}))).findAll('a')[-2]['href']
 
-        # testLink = links[0]
-        testLink = link
-        soup = BeautifulSoup(urllib.urlopen(testLink).read())
+            firsturl = newlink
 
-        fileDate = soup.find('meta')['content']
+        # print links
 
-        frames = soup.find_all('frame')
-        actualFrame = str(frames[1])
-        m = re.search('src="[a-zA-Z\?\.\=0-9\-\&;:\/]*"', actualFrame)
-        actualLink = m.group(0)[5:-1]
-        print actualLink
+        htmlLinks = {}
+
+        for date in links.keys():
+            link = links[date]
+            testLink = link
+            soup = BeautifulSoup(urllib.urlopen(testLink).read())
+
+            fileDate = soup.find('meta')['content']
+
+            frames = soup.find_all('frame')
+            actualFrame = str(frames[1])
+            m = re.search('src="[a-zA-Z\?\.\=0-9\-\&;:\/]*"', actualFrame)
+            actualLink = m.group(0)[5:-1]
+
+            links[date] = actualLink
+        return links
+
+t = TenQ()
+t.parseSingle('http://apps.shareholder.com/sec/viewerContent.aspx?companyid=AAPL&docid=9236741')
 
 def parse_yahoo_stock(line):
     parts = line.split(',')
@@ -428,8 +449,6 @@ apple.getData() # defaults to time padding of 7 days
 
 datahash = getProductReleasesForApple()
 # print datahash
-
-secFilingsLinks()
 
 """
 import pandas
