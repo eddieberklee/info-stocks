@@ -3,11 +3,24 @@ import re
 
 class Date:
     def __init__(self, date):
-        splitDate = date.split('-')
-        self.date = date
-        self.m = int(splitDate[0])
-        self.d = int(splitDate[1])
-        self.y = int(splitDate[2])
+        months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        if re.search('[a-zA-Z]{3}\ [0-9]{1,2},\ [0-9]{4}',date):
+            splitDate = date.split(' ')
+
+            threeLetterMonths = map(lambda month: month[:3], months)
+
+            self.m = int(threeLetterMonths.index(splitDate[0])+1)
+
+            if ',' in splitDate[1]:
+                self.d = int(splitDate[1].replace(',',''))
+            self.y = int(splitDate[2])
+            self.date = `self.m` + '-' + `self.d` + '-' + `self.y`
+        else:
+            splitDate = date.split('-')
+            self.date = date
+            self.m = int(splitDate[0])
+            self.d = int(splitDate[1])
+            self.y = int(splitDate[2])
 
     def __repr__(self):
         return str('Date(' + self.date + ')')
@@ -59,8 +72,9 @@ def secFilingsLinks():
             message = 'Could not find means there are more pages to search'
         if message == 'There are no Quarterly filings available.': pagesLeft = False; break
 
-        content = BeautifulSoup(str(soup.find('table',id='filings-table')))
-        trs = BeautifulSoup(str(content.find_all('tr')))
+        filingsTable = BeautifulSoup(str(soup.find('table',id='filings-table')))
+
+        trs = BeautifulSoup(str(filingsTable.find_all('tr')))
         for tr in trs:
             tds = BeautifulSoup(str(tr)).find_all('td')
             if len(tds) >= 1:
@@ -69,7 +83,16 @@ def secFilingsLinks():
                 a = str(a)
                 m = re.search('href="[a-zA-Z\?\.\=0-9\-\&;]*"', a)
                 link = m.group(0)[6:-1]
+
+                filing = tds[0]
+                filing = filing.text
+
+                date = tds[2]
+                print Date(date.text)
+
                 links.append('http://investor.apple.com/' + link)
+
+        # dates.append()
 
         newlink = 'http://investor.apple.com' + BeautifulSoup(str(soup.find('div',{'class':'table-nav rounded clearme'}))).findAll('a')[-2]['href']
 
