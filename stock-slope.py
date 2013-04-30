@@ -45,20 +45,36 @@ def secFilingsLinks():
     from bs4 import BeautifulSoup
     import re
     firsturl = 'http://investor.apple.com/sec.cfm?DocType=Quarterly&DocTypeExclude=&SortOrder=FilingDate%20Descending&Year=&Pagenum=1&FormatFilter=&CIK='
-    html = urllib.urlopen(firsturl).read()
-    soup = BeautifulSoup(html)
-    content = soup.find('table',id='filings-table')
-    trs = BeautifulSoup(str(content.find_all('tr')))
+    pagesLeft = True
     links = []
-    for tr in trs:
-        tds = BeautifulSoup(str(tr)).find_all('td')
-        if len(tds) >= 1:
-            lastTD = tds[-1]
-            a = BeautifulSoup(str(lastTD)).find('a')
-            a = str(a)
-            m = re.search('href="[a-zA-Z\?\.\=0-9\-\&;]*"', a)
-            link = m.group(0)[6:-1]
-            links.append('http://investor.apple.com/' + link)
+
+    while pagesLeft == True:
+        print firsturl
+        html = urllib.urlopen(firsturl).read()
+        soup = BeautifulSoup(html)
+
+        try:
+            message = BeautifulSoup(str(soup.find('div',id='main'))).find('div',{'class':'table-wrapper'}).find('p').text
+        except:
+            message = 'Could not find means there are more pages to search'
+        if message == 'There are no Quarterly filings available.': pagesLeft = False; break
+
+        content = BeautifulSoup(str(soup.find('table',id='filings-table')))
+        trs = BeautifulSoup(str(content.find_all('tr')))
+        for tr in trs:
+            tds = BeautifulSoup(str(tr)).find_all('td')
+            if len(tds) >= 1:
+                lastTD = tds[-1]
+                a = BeautifulSoup(str(lastTD)).find('a')
+                a = str(a)
+                m = re.search('href="[a-zA-Z\?\.\=0-9\-\&;]*"', a)
+                link = m.group(0)[6:-1]
+                links.append('http://investor.apple.com/' + link)
+
+        newlink = 'http://investor.apple.com' + BeautifulSoup(str(soup.find('div',{'class':'table-nav rounded clearme'}))).findAll('a')[-2]['href']
+
+        firsturl = newlink
+
     # print links
 
     htmlLinks = {}
@@ -358,7 +374,9 @@ apple.getData() # defaults to time padding of 7 days
 # apple.getData(2)
 
 datahash = getProductReleasesForApple()
-print datahash
+# print datahash
+
+secFilingsLinks()
 
 """
 import pandas
@@ -380,8 +398,6 @@ for item in sortedTimeline:
     discontinueDate.append(item[1][2])
 
 timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Stock Impact': 0}).set_index('Product Name')
-
-secFilingsLinks()
 
 sampleQuery = Query("family", "Modems")
 print sampleQuery.startDate.date
