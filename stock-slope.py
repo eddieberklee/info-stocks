@@ -280,6 +280,7 @@ class Company:
 
 class Query:
     def __init__(self, queryType, arg, daysPadding=1):
+        self.daysPadding = daysPadding
         self.symbol = "AAPL"
         self.queryType = queryType
         self.arg = arg
@@ -310,7 +311,9 @@ class Query:
         import matplotlib
         self.dataFrame.plot(use_index=True, y='Stock Impact')
 
-    def getStockData(self):
+    def getIndividualStock
+
+    def getRangeStockData(self):
         interval = 'd'
         url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
             % ( self.symbol, self.startDate.m-1, self.startDate.d, self.startDate.y, self.endDate.m-1, self.endDate.d, self.endDate.y, interval)
@@ -331,7 +334,7 @@ class Query:
         return difference
 
     def setStockData(self):
-        
+
 
 apple = Company("Apple")
 apple.getData() # defaults to time padding of 7 days
@@ -350,7 +353,6 @@ import matplotlib as plt
 timeline = datahash
 
 sortedTimeline = sorted(timeline.items(),key=lambda tup: tup[1][0].numericDate())
-
 
 productName = []
 family = []
