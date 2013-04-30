@@ -39,6 +39,42 @@ class Date:
 
         return int(year + month + day)
 
+def secFilingsLinks():
+    from bs4 import BeautifulSoup
+    import re
+    firsturl = 'http://investor.apple.com/sec.cfm?DocType=Quarterly&DocTypeExclude=&SortOrder=FilingDate%20Descending&Year=&Pagenum=1&FormatFilter=&CIK='
+    html = urllib.urlopen(firsturl).read()
+    soup = BeautifulSoup(html)
+    content = soup.find('table',id='filings-table')
+    trs = BeautifulSoup(str(content.find_all('tr')))
+    links = []
+    for tr in trs:
+        tds = BeautifulSoup(str(tr)).find_all('td')
+        if len(tds) >= 1:
+            lastTD = tds[-1]
+            a = BeautifulSoup(str(lastTD)).find('a')
+            a = str(a)
+            m = re.search('href="[a-zA-Z\?\.\=0-9\-\&;]*"', a)
+            link = m.group(0)[6:-1]
+            links.append('http://investor.apple.com/' + link)
+    # print links
+
+    htmlLinks = {}
+
+    # for loop it here
+    for link in links:
+
+        # testLink = links[0]
+        testLink = link
+        soup = BeautifulSoup(urllib.urlopen(testLink).read())
+
+        fileDate = soup.find('meta')['content']
+
+        frames = soup.find_all('frame')
+        actualFrame = str(frames[1])
+        m = re.search('src="[a-zA-Z\?\.\=0-9\-\&;:\/]*"', actualFrame)
+        actualLink = m.group(0)[5:-1]
+        print actualLink
 
 def parse_yahoo_stock(line):
     parts = line.split(',')
@@ -271,6 +307,9 @@ class Query:
     def plot():
         self.dataFrame.plot(use_index=True, y='Stock Impact')
 
+secFilingsLinks()
+
+"""
 
 apple = Company("Apple")
 apple.getData() # defaults to time padding of 7 days
@@ -302,3 +341,5 @@ for item in sortedTimeline:
     discontinueDate.append(item[1][2])
 
 timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Stock Impact': 0}).set_index('Product Name')
+
+"""
