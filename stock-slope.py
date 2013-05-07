@@ -40,19 +40,42 @@ class Date:
         earliestDate = datetime.date(1985, 9, 2)
 
         # earliest borderline check
-        if beginInterval < earliestDate:
-            # print "this should print"
-            
+        if beginInterval < earliestDate:   
             beginInterval = earliestDate
             endInterval = beginInterval + difference + difference
-            beginInterval = str(beginInterval.month) + '-' + str(beginInterval.day) + '-' + str(beginInterval.year)
-            endInterval = str(endInterval.month) + '-' + str(endInterval.day) + '-' + str(endInterval.year)
-            return (Date(beginInterval), Date(endInterval))
+        
+        beginDate = Date(str(beginInterval.month) + '-' + str(beginInterval.day) + '-' + str(beginInterval.year))
+        endDate = Date(str(endInterval.month) + '-' + str(endInterval.day) + '-' + str(endInterval.year))
+        #make sure none of dates returned are weekends
+        import calendar
+        if calendar.weekday(beginDate.y, beginDate.m, beginDate.d) == 6: # beginDate is Sunday
+            # print 'beginDate is Sunday'
+            difference = datetime.timedelta(days=2)
+            date = datetime.date(int(beginDate.y), int(beginDate.m), int(beginDate.d))
+            beginInterval = date - difference
+        elif calendar.weekday(beginDate.y, beginDate.m, beginDate.d) == 5: # beginDate is Saturday
+            # print 'beginDate is Saturday'
+            difference = datetime.timedelta(days=1)
+            date = datetime.date(int(beginDate.y), int(beginDate.m), int(beginDate.d))
+            beginInterval = date - difference
+        if calendar.weekday(endDate.y, endDate.m, endDate.d) == 6: # endDate is Sunday
+            # print 'endDate is Sunday'
+            difference = datetime.timedelta(days=1)
+            date = datetime.date(int(endDate.y), int(endDate.m), int(endDate.d))
+            endInterval = date + difference
+        elif calendar.weekday(endDate.y, endDate.m, endDate.d) == 5: # endDate is Saturday
+            # print 'endDate is Saturday'
+            difference = datetime.timedelta(days=2)
+            date = datetime.date(int(endDate.y), int(endDate.m), int(endDate.d))
+            endInterval = date + difference
 
-        else:
-            beginInterval = str(beginInterval.month) + '-' + str(beginInterval.day) + '-' + str(beginInterval.year)
-            endInterval = str(endInterval.month) + '-' + str(endInterval.day) + '-' + str(endInterval.year)
-            return (Date(beginInterval), Date(endInterval))
+        # begin interval is a weekend:
+        beginDate = Date(str(beginInterval.month) + '-' + str(beginInterval.day) + '-' + str(beginInterval.year))
+        endDate = Date(str(endInterval.month) + '-' + str(endInterval.day) + '-' + str(endInterval.year))
+        # print self
+        # print beginDate
+        # print endDate
+        return (beginDate, endDate)
 
     #returns an integer representation of the date that makes the date easy to sort
     def numericDate(self):
@@ -295,7 +318,7 @@ def getProductReleasesForApple():
 
 class Query:
     #queryTypes: "timerange, family, product"
-    def __init__(self, queryType, arg, daysPadding=1):
+    def __init__(self, queryType, arg, daysPadding=5):
         self.daysPadding = daysPadding
         self.symbol = "AAPL"
         self.queryType = queryType
@@ -315,6 +338,8 @@ class Query:
                 dateRange = date.dateRange(daysPadding)
             self.startDate = self.dataFrame['Release Date'][0].dateRange(daysPadding)[0]
             self.endDate = self.dataFrame['Release Date'][-1].dateRange(daysPadding)[1]
+            print self.startDate
+            print self.endDate
             # self.dateBoundary()
         elif queryType=="product":
             self.dataFrame = timelineDataFrame[timelineDataFrame.index == arg]
@@ -326,24 +351,21 @@ class Query:
             print "invalid queryType"
 
         self.setStockData()
-        print self.dataFrame
-
-    # def dateBoundary(self):
-    #     dateBoundary = Date("9-2-1985")
-    #     if self.startDate.numericDate() < dateBoundary.numericDate():
-    #         print "startDate goes past the  information we have. startDate set to earliest possible date."
-    #         self.startDate = dateBoundary
+        # print self.dataFrame
 
     def plotIndividualStockDifferences(self):
         import matplotlib.pyplot as plt
-        plot = mouseHoverPlot(self.dataFrame['Individual Stock Difference'], self.dataFrame)
+        plot = mouseHoverPlot(self.dataFrame['Individual Stock Difference'], self.dataFrame, 'Individual Stock Difference')
         pl.ylabel('Stock Difference over %d day(s) in dollars' % self.daysPadding)
+        pl.xlabel('Product Names')
         pl.show()
 
     def plotSlopeChanges(self):
         import matplotlib.pyplot as plt
-        self.dataFrame.plot(use_index=True, y='Stock Slope Change')
-        plt.show()
+        plot = mouseHoverPlot(self.dataFrame['Stock Slope Change'], self.dataFrame, 'Stock Slope Change')
+        pl.ylabel('Stock slope changes over %d day(s) in dollars' % self.daysPadding)
+        pl.xlabel('Product Names')
+        pl.show()
 
     def getIndividualStock(self, releaseDate):
         dateRange = releaseDate.dateRange(self.daysPadding)
@@ -362,6 +384,7 @@ class Query:
         end = ulines[1]
         
         difference = parse_yahoo_stock(end)['Close'] - parse_yahoo_stock(start)['Close']
+        # print 'getIndividualStock works'
         if difference > 0:
             sign = '+'
         else:
@@ -383,6 +406,7 @@ class Query:
         end = ulines[1]
         
         difference = parse_yahoo_stock(end)['Close'] - parse_yahoo_stock(start)['Close']
+        # print 'rangestockdata works'
         if difference > 0:
             sign = '+'
         else:
@@ -392,31 +416,50 @@ class Query:
 
     def getStockSlope(self, releaseDate):
         interval = 'd'
+        startDate = releaseDate.dateRange(self.daysPadding)[0]
+        endDate = releaseDate.dateRange(self.daysPadding)[1]
+
+        # print self.dataFrame
+
         url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
-            % ( self.symbol, self.startDate.m-1, self.startDate.d, self.startDate.y, releaseDate.m-1, releaseDate.d, releaseDate.y, interval)
+            % ( self.symbol, startDate.m-1, startDate.d, startDate.y, releaseDate.m-1, releaseDate.d, releaseDate.y, interval)
         from time import sleep
         u = urllib.urlopen(url)
         ulines = u.read().split("\n")
         start = ulines[-2]
         end = ulines[1]
+        # print end
+        # print self.startDate
+        # print releaseDate
+        # print self.endDate
+        # print 'about to start stockSlopes'
+        # print 'startDate: ', startDate
+        # print 'releaseDate: ', releaseDate
+        # print 'endDate: ', endDate
+        # print start,end
+        # print parse_yahoo_stock(end)
         leadingDifference = parse_yahoo_stock(end)['Close'] - parse_yahoo_stock(start)['Close']
+        # print 'getstockslope part 1 works'
         leadingSlope = leadingDifference / self.daysPadding
-
+        
         url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
-            % ( self.symbol, releaseDate.m-1, releaseDate.d, releaseDate.y, self.endDate.m-1, self.endDate.d, self.endDate.y, interval)
-        from time import sleep
+            % ( self.symbol, releaseDate.m-1, releaseDate.d, releaseDate.y, endDate.m-1, endDate.d, endDate.y, interval)
+        # from time import sleep
         u = urllib.urlopen(url)
         ulines = u.read().split("\n")
         start = ulines[-2]
         end = ulines[1]
         leavingDifference = parse_yahoo_stock(end)['Close'] - parse_yahoo_stock(start)['Close']
+        # print 'getstockslope part 2 works'
         leavingSlope = leavingDifference / self.daysPadding
+        # print start,end
 
         slopeDifference = leavingSlope - leadingSlope
         return slopeDifference       
 
     def setStockData(self): # should set both RangeStock and IndividualStock
         rangeStockImpact = self.getRangeStockData()
+        # print 'set rangeStockData'
         self.dataFrame['Range Stock Difference'] = rangeStockImpact
         indivStocks = []
         stockSlopes = []
@@ -424,7 +467,9 @@ class Query:
             indivStocks.append(self.getIndividualStock(date))
             stockSlopes.append(self.getStockSlope(date))
         self.dataFrame['Individual Stock Difference'] = indivStocks
+        # print 'set individual stock'
         self.dataFrame['Stock Slope Change'] = stockSlopes
+        # print 'set stock slopes'
         
     #returns row of most influential product
     def getMostInfluencial(self):
@@ -444,7 +489,8 @@ import numpy as np
 import random
 
 class mouseHoverPlot(object):
-    def __init__(self, dataY, dataFrame):
+    def __init__(self, dataY, dataFrame, plotType):
+        self.plotType = plotType
         self.dataFrame = dataFrame
         self.figure = pl.figure()
         self.axis = self.figure.add_subplot(111)
@@ -470,7 +516,7 @@ class mouseHoverPlot(object):
                     def productName(xPos):
                         return self.xTicks[int(round(xPos))]
                     # print self.dataFrame[self.dataFrame.index == productName(event.xdata)]['Release Date'][0]
-                    top = tip='Product: %s\nRelease Date: %s\nStock Price Difference: $%.2f' % (productName(event.xdata),self.dataFrame[self.dataFrame.index == productName(event.xdata)]['Release Date'][0], self.dataFrame[self.dataFrame.index == productName(event.xdata)]['Individual Stock Difference'][0] )
+                    top = tip='Product: %s\nRelease Date: %s\nStock Price Difference: $%.2f' % (productName(event.xdata),self.dataFrame[self.dataFrame.index == productName(event.xdata)]['Release Date'][0], self.dataFrame[self.dataFrame.index == productName(event.xdata)][self.plotType][0] )
                     self.tooltip.SetTip(tip) 
                     self.tooltip.Enable(True)
                     collisionFound = True
@@ -481,16 +527,12 @@ class mouseHoverPlot(object):
 datahash = getProductReleasesForApple()
 
 timeline = datahash
-
 sortedTimeline = sorted(timeline.items(),key=lambda tup: tup[1][0].numericDate())
-
 productName = []
 family = []
 releaseDate = []
 discontinueDate = []
-
 for item in sortedTimeline:
-    # print "%s %s %s %s" % (item[0], item[1][0], item[1][1], item[1][2])
     productName.append(item[0])
     releaseDate.append(item[1][0])
     family.append(item[1][1])
@@ -509,10 +551,12 @@ def removeOldItems(borderDate):
 earliestDate = Date("9-2-1985")
 timelineDataFrame = removeOldItems(earliestDate)
 
-# sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
-# sampleQuery.plotSlopeChanges()
+# print timelineDataFrame[:20]
 
-sampleFamilyQuery = Query("family", 'Drives')
-sampleFamilyQuery.plotIndividualStockDifferences()
+sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
+sampleQuery.plotSlopeChanges()
+
+# sampleFamilyQuery = Query("family", 'Displays')
+# sampleFamilyQuery.plotIndividualStockDifferences()
 
 # print timelineDataFrame['Macintosh plus (Platinum)']
