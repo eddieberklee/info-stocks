@@ -40,6 +40,7 @@ class Date:
 
         # earliest borderline check
         if beginInterval < earliestDate:
+            # print "this should print"
             
             beginInterval = earliestDate
             endInterval = beginInterval + difference + difference
@@ -347,9 +348,6 @@ class Query:
         startIndividualDate = dateRange[0]
         endIndividualDate = dateRange[1]
 
-        if startIndividualDate.numericDate() < Date("9-2-1985"):
-            startIndividualDate = Date("9-2-1985")
-
         interval = 'd'
         url = "http://ichart.yahoo.com/table.csv?s=%s&a=%i&b=%i&c=%i&d=%i&e=%i&f=%i&g=%s&ignore=.csv" \
             % ( self.symbol, startIndividualDate.m-1, startIndividualDate.d, startIndividualDate.y, endIndividualDate.m-1, endIndividualDate.d, endIndividualDate.y, interval)
@@ -452,8 +450,8 @@ for item in sortedTimeline:
 import pandas 
 timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Individual Stock Difference': 0, 'Range Stock Difference': 0, 'Stock Slope Change': 0}).set_index('Product Name')
 
-sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
+# sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
 # sampleQuery.plotSlopeChanges()
 
-# sampleFamilyQuery = Query("family", 'Drives')
+sampleFamilyQuery = Query("family", 'Drives')
 # sampleFamilyQuery.plotIndividualStockDifferences()
