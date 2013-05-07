@@ -450,11 +450,8 @@ for item in sortedTimeline:
     releaseDate.append(item[1][0])
     family.append(item[1][1])
     discontinueDate.append(item[1][2])
+
 import pandas 
-print productName
-print family
-print releaseDate
-print discontinueDate
 timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Individual Stock Difference': 0, 'Range Stock Difference': 0, 'Stock Slope Change': 0})
 
 sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
