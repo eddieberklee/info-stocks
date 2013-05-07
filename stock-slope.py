@@ -40,6 +40,7 @@ class Date:
 
         # earliest borderline check
         if beginInterval < earliestDate:
+            
             beginInterval = earliestDate
             endInterval = beginInterval + difference + difference
             beginInterval = str(beginInterval.month) + '-' + str(beginInterval.day) + '-' + str(beginInterval.year)
@@ -302,7 +303,7 @@ class Query:
         if queryType=="timerange":
             self.startDate = arg[0].dateRange(daysPadding)[0]
             self.endDate = arg[1].dateRange(daysPadding)[1]
-            self.dateBoundary()
+            # self.dateBoundary()
             criterion = timelineDataFrame['Release Date'].map(lambda date: (date.numericDate() > self.startDate.numericDate()) and (date.numericDate() < self.endDate.numericDate()))
             self.dataFrame = timelineDataFrame[criterion]
         elif queryType=="family":
@@ -312,24 +313,24 @@ class Query:
                 dateRange = date.dateRange(daysPadding)
             self.startDate = self.dataFrame['Release Date'][0].dateRange(daysPadding)[0]
             self.endDate = self.dataFrame['Release Date'][-1].dateRange(daysPadding)[1]
-            self.dateBoundary()
+            # self.dateBoundary()
         elif queryType=="product":
             self.dataFrame = timelineDataFrame[timelineDataFrame.index == arg]
             dateRange = self.dataFrame['Release Date'][0].dateRange(daysPadding)
             self.startDate = dateRange[0]
             self.endDate = dateRange[1]
-            self.dateBoundary()
+            # self.dateBoundary()
         else:
             print "invalid queryType"
 
         self.setStockData()
         print self.dataFrame
 
-    def dateBoundary(self):
-        dateBoundary = Date("9-2-1985")
-        if self.startDate.numericDate() < dateBoundary.numericDate():
-            print "startDate goes past the  information we have. startDate set to earliest possible date."
-            self.startDate = dateBoundary
+    # def dateBoundary(self):
+    #     dateBoundary = Date("9-2-1985")
+    #     if self.startDate.numericDate() < dateBoundary.numericDate():
+    #         print "startDate goes past the  information we have. startDate set to earliest possible date."
+    #         self.startDate = dateBoundary
 
     def plotIndividualStockDifferences(self):
         import matplotlib.pyplot as plt
@@ -456,9 +457,8 @@ print releaseDate
 print discontinueDate
 timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Individual Stock Difference': 0, 'Range Stock Difference': 0, 'Stock Slope Change': 0})
 
-# sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
+sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
 # sampleQuery.plotSlopeChanges()
 
-sampleQuery = Query("family", 'Drives')
-sampleQuery.plotIndividualStockDifferences()
-
+# sampleFamilyQuery = Query("family", 'Drives')
+# sampleFamilyQuery.plotIndividualStockDifferences()
