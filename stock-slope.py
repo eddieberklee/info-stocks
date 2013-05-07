@@ -54,6 +54,7 @@ class Date:
 
         return int(year + month + day)
 
+"""
 class TenQ:
     def __init__(self):
         # self.links = self.getAllSecFilingsLinks
@@ -145,10 +146,7 @@ class TenQ:
 
             links[date] = actualLink
         return links
-
-t = TenQ()
-t.parseSingle('http://apps.shareholder.com/sec/viewerContent.aspx?companyid=AAPL&docid=9236741')
-
+"""
 
 def parse_yahoo_stock(line):
     parts = line.split(',')
@@ -443,3 +441,6 @@ timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date
 
 sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
 sampleQuery.plotSlopeChanges()
+
+
+
