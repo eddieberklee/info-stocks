@@ -338,8 +338,8 @@ class Query:
                 dateRange = date.dateRange(daysPadding)
             self.startDate = self.dataFrame['Release Date'][0].dateRange(daysPadding)[0]
             self.endDate = self.dataFrame['Release Date'][-1].dateRange(daysPadding)[1]
-            print self.startDate
-            print self.endDate
+            # print self.startDate
+            # print self.endDate
             # self.dateBoundary()
         elif queryType=="product":
             self.dataFrame = timelineDataFrame[timelineDataFrame.index == arg]
@@ -478,9 +478,7 @@ class Query:
         maxProductRow = self.dataFrame[self.dataFrame.index == maxProduct]
         return maxProductRow
 
-import matplotlib as plt
-plt.use('WXAgg')
-plt.interactive(False)
+
 
 import pylab as pl
 from pylab import get_current_fig_manager as gcfm
@@ -490,6 +488,9 @@ import random
 
 class mouseHoverPlot(object):
     def __init__(self, dataY, dataFrame, plotType):
+        import matplotlib as plt
+        plt.use('WXAgg')
+        plt.interactive(False)
         self.plotType = plotType
         self.dataFrame = dataFrame
         self.figure = pl.figure()
@@ -553,10 +554,11 @@ timelineDataFrame = removeOldItems(earliestDate)
 
 # print timelineDataFrame[:20]
 
-sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
-sampleQuery.plotSlopeChanges()
+# sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
+# sampleQuery.plotSlopeChanges()
 
-# sampleFamilyQuery = Query("family", 'Displays')
-# sampleFamilyQuery.plotIndividualStockDifferences()
+sampleFamilyQuery = Query("family", 'iMac')
+sampleFamilyQuery.plotIndividualStockDifferences()
+sampleFamilyQuery.plotSlopeChanges()
 
 # print timelineDataFrame['Macintosh plus (Platinum)']
