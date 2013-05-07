@@ -450,7 +450,17 @@ for item in sortedTimeline:
     discontinueDate.append(item[1][2])
 
 import pandas 
-timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Individual Stock Difference': 0, 'Range Stock Difference': 0, 'Stock Slope Change': 0})
+timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 
+                                    'Family': family,  'Date Discontinued': discontinueDate, 
+                                    'Individual Stock Difference': 0, 'Range Stock Difference': 0, 
+                                    'Stock Slope Change': 0}).set_index('Product Name')
+
+def removeOldItems(borderDate):
+    criterion = timelineDataFrame['Release Date'].map(lambda date: date.numericDate() > borderDate.numericDate())
+    return timelineDataFrame[criterion]
+
+earliestDate = Date("9-2-1985")
+timelineDataFrame = removeOldItems(earliestDate)
 
 # sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
 # sampleQuery.plotSlopeChanges()
