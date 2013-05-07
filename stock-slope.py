@@ -36,11 +36,20 @@ class Date:
         difference = datetime.timedelta(days=daysPadding)
         beginInterval = date - difference
         endInterval = date + difference
+        earliestDate = datetime.date(1985, 9, 2)
 
-        beginInterval = str(beginInterval.month) + '-' + str(beginInterval.day) + '-' + str(beginInterval.year)
-        endInterval = str(endInterval.month) + '-' + str(endInterval.day) + '-' + str(endInterval.year)
-        
-        return (Date(beginInterval), Date(endInterval))
+        # earliest borderline check
+        if beginInterval < earliestDate:
+            beginInterval = earliestDate
+            endInterval = beginInterval + difference + difference
+            beginInterval = str(beginInterval.month) + '-' + str(beginInterval.day) + '-' + str(beginInterval.year)
+            endInterval = str(endInterval.month) + '-' + str(endInterval.day) + '-' + str(endInterval.year)
+            return (Date(beginInterval), Date(endInterval))
+
+        else:
+            beginInterval = str(beginInterval.month) + '-' + str(beginInterval.day) + '-' + str(beginInterval.year)
+            endInterval = str(endInterval.month) + '-' + str(endInterval.day) + '-' + str(endInterval.year)
+            return (Date(beginInterval), Date(endInterval))
 
     #returns an integer representation of the date that makes the date easy to sort
     def numericDate(self):
@@ -147,6 +156,9 @@ class TenQ:
             links[date] = actualLink
         return links
 """
+
+# t = TenQ()
+# t.parseSingle('http://apps.shareholder.com/sec/viewerContent.aspx?companyid=AAPL&docid=9236741')
 
 def parse_yahoo_stock(line):
     parts = line.split(',')
@@ -439,8 +451,9 @@ for item in sortedTimeline:
 import pandas 
 timelineDataFrame = pandas.DataFrame({'Product Name': productName, 'Release Date':releaseDate, 'Family': family,  'Date Discontinued': discontinueDate, 'Individual Stock Difference': 0, 'Range Stock Difference': 0, 'Stock Slope Change': 0}).set_index('Product Name')
 
-sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
-sampleQuery.plotSlopeChanges()
+# sampleQuery = Query("timerange", (Date("1-1-1911"), Date("3-6-1992")))
+# sampleQuery.plotSlopeChanges()
 
-
+sampleQuery = Query("family", 'Drives')
+sampleQuery.plotIndividualStockDifferences()
 
